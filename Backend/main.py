@@ -294,7 +294,7 @@ def main():
 
     headers = {
         "Modal-Key": "wk-kTWTjQFso8DbspbiIrSziZ",
-        "Modal-Secret": " ws-UrM4VoJ3ma5mhoPE5eu9Oa",
+        "Modal-Secret": "ws-UrM4VoJ3ma5mhoPE5eu9Oa",
     }
 
     response = requests.post(endpoint_url, json=payload, headers=headers)
