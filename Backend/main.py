@@ -292,12 +292,8 @@ def main():
 
     payload = request_data.model_dump()
 
-    headers = {
-        "Modal-Key": "wk-kTWTjQFso8DbspbiIrSziZ",
-        "Modal-Secret": "ws-UrM4VoJ3ma5mhoPE5eu9Oa",
-    }
 
-    response = requests.post(endpoint_url, json=payload, headers=headers)
+    response = requests.post(endpoint_url, json=payload)
     response.raise_for_status()
 
     result = GenrateMusicResponseS3(**response.json())
