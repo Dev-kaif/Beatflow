@@ -32,13 +32,13 @@ export function AppSidebar() {
         </div>
         <UserButton
           variant="outline"
-          additionalLinks={[
-            {
-              label: "Customer Portal",
-              href: "/customer-portal",
-              icon: <User />,
-            },
-          ]}
+          // additionalLinks={[
+          //   {
+          //     label: "Customer Portal",
+          //     href: "/customer-portal",
+          //     icon: <User />,
+          //   },
+          // ]}
         />
       </SidebarFooter>
     </Sidebar>
