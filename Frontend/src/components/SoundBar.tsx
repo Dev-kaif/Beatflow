@@ -119,9 +119,17 @@ export default function SoundBar() {
                   <Music className="h-4 w-4 text-white" />
                 )}
               </div>
-              <div className="max-w-24 min-w-0 flex-1 md:max-w-full">
-                <p className="truncate text-sm font-medium">{track?.title}</p>
-                <p className="text-muted-foreground truncate text-xs">
+              <div className="flex max-w-96 flex-col space-y-1">
+                <p
+                  className="w-full truncate text-sm font-medium"
+                  title={track.title!}
+                >
+                  {track?.title}
+                </p>
+                <p
+                  className="text-muted-foreground w-full truncate text-xs"
+                  title={track.createdByUserName!}
+                >
                   {track?.createdByUserName}
                 </p>
               </div>

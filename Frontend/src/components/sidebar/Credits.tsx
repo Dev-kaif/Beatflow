@@ -19,9 +19,11 @@ export async function Credits() {
   });
 
   return (
-    <div>
-      <span>{user.credits}</span>
-      <span>Credits</span>
+    <div className="flex w-max items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 shadow-sm dark:bg-gray-800">
+      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+        {user.credits}
+      </span>
+      <span className="text-sm text-gray-500 dark:text-gray-400">Credits</span>
     </div>
   );
 }

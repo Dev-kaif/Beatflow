@@ -41,8 +41,8 @@ export default function RootLayout({
         <body>
           <SidebarProvider>
             <AppSidebar />
-            <SidebarInset>
-              <header className="bg-background sticky-top z-50 border-b px-4 py-2">
+            <SidebarInset className="relative flex h-screen flex-col">
+              <header className="bg-background sticky top-0 z-50 border-b px-4 py-2">
                 <div className="flex shrink-0 grow items-center gap-2">
                   <SidebarTrigger className="-ml-1" />
                   <Separator
@@ -58,8 +58,10 @@ export default function RootLayout({
                   </Breadcrumb>
                 </div>
               </header>
-              <main className="flex-1 overflow-y-auto">{children}</main>
-              <SoundBar />
+              <main className="flex-1">{children}</main>
+              <div className="absolute right-0 bottom-0 left-0 z-20">
+                <SoundBar />
+              </div>
             </SidebarInset>
           </SidebarProvider>
           <Toaster />

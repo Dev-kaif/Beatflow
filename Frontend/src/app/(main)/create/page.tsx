@@ -16,9 +16,11 @@ export default async function Page() {
   }
 
   return (
-    <div className="flex h-full flex-col lg:flex-row">
-      <SongPanel />
-      <div className="h-full flex-1">
+    <div className="flex flex-col lg:flex-row">
+      <div className="bg-background sticky top-0 z-10 w-full flex-none lg:w-1/4">
+        <SongPanel />
+      </div>
+      <div className="h-[calc(100vh-100px)] flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,white,white_90%,transparent)] [mask-size:100%_100%] [mask-position:0_20px] [mask-repeat:no-repeat]">
         <Suspense
           fallback={
             <div className="flex h-full w-full items-center justify-center">
