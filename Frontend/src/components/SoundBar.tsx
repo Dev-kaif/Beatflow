@@ -1,25 +1,11 @@
 "use client";
 
-import {
-  Download,
-  MoreHorizontal,
-  Music,
-  Pause,
-  Play,
-  Volume2,
-  X,
-} from "lucide-react";
+import { Download, Music, Pause, Play, Volume2, X } from "lucide-react";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Slider } from "./ui/slider";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import Image from "next/image";
 
 export default function SoundBar() {
@@ -134,7 +120,7 @@ export default function SoundBar() {
                 )}
               </div>
               <div className="max-w-24 min-w-0 flex-1 md:max-w-full">
-                <p className="trucate text-sm font-medium">{track?.title}</p>
+                <p className="truncate text-sm font-medium">{track?.title}</p>
                 <p className="text-muted-foreground truncate text-xs">
                   {track?.createdByUserName}
                 </p>
