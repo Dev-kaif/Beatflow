@@ -30,7 +30,7 @@ export default function SidebarMenuItems() {
   return (
     <>
       {items.map((item) => (
-        <SidebarMenuItem key={item.title}>
+        <SidebarMenuItem key={item.title} className="list-none">
           <SidebarMenuButton asChild isActive={item.active}>
             <a href={item.url}>
               <item.icon />
