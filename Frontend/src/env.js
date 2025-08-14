@@ -17,6 +17,7 @@ export const env = createEnv({
     MODAL_SECRET: z.string(),
     AWS_ACCESS_KEY_ID: z.string(),
     AWS_SECRET_ACCESS_KEY_ID: z.string(),
+    AWS_ACCOUNT_ID: z.string(),
     S3_BUCKET_NAME: z.string(),
     GENERATE_FROM_DESCRIPTION: z.string(),
     GENERATE_FROM_DESCRIBED_LYRICS: z.string(),
@@ -52,6 +53,7 @@ export const env = createEnv({
     AWS_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY_ID: process.env.R2_SECRET_ACCESS_KEY,
     S3_BUCKET_NAME: process.env.R2_BUCKET_NAME,
+    AWS_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
 
     GENERATE_FROM_DESCRIPTION: process.env.GENERATE_FROM_DESCRIPTION,
     GENERATE_FROM_DESCRIBED_LYRICS: process.env.GENERATE_WITH_DESCRIBED_LYRICS,

@@ -33,7 +33,7 @@ model Song {
   title             String
   s3Key             String?
   thumbnailUrl      String?
-  status            String   @default("QUEUED")
+  status            String   @default("queued")
   instrumental      Boolean  @default(false)
   prompt            String?
   lyrics            String?
