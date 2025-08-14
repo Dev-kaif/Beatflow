@@ -120,7 +120,18 @@ export default async function Page() {
         </div>
       )}
 
-      {/* Categories */}
+      {/* Popular */}
+      {popularSongs.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold">Popular</h2>
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {popularSongs.map((song) => (
+              <SongCard key={song.id} userId={userId} song={song} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {Object.entries(categorizedSongs)
         .slice(0, 5)
         .map(([category, songs]) => (

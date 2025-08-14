@@ -5,9 +5,7 @@ import SoundBar from "@/components/SoundBar";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -58,8 +56,8 @@ export default function RootLayout({
                   </Breadcrumb>
                 </div>
               </header>
-              <main className="flex-1">{children}</main>
-              <div className="absolute right-0 bottom-0 left-0 z-20">
+              <main className="flex-1 pb-20">{children}</main>
+              <div className="fixed right-0 bottom-0 left-0 lg:left-64 z-20">
                 <SoundBar />
               </div>
             </SidebarInset>
