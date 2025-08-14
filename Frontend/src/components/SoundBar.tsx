@@ -134,7 +134,7 @@ export default function SoundBar() {
                 )}
               </div>
               <div className="max-w-24 min-w-0 flex-1 md:max-w-full">
-                <p className="truncate text-sm font-medium">{track?.title}</p>
+                <p className="trucate text-sm font-medium">{track?.title}</p>
                 <p className="text-muted-foreground truncate text-xs">
                   {track?.createdByUserName}
                 </p>

@@ -112,7 +112,7 @@ export default async function Page() {
       {trendingSongs.length > 0 && (
         <div className="mt-6">
           <h2 className="text-xl font-semibold">Trending</h2>
-          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {trendingSongs.map((song) => (
               <SongCard key={song.id} userId={userId} song={song} />
             ))}
