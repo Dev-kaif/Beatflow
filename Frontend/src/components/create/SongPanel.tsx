@@ -7,7 +7,6 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Loader2, Music, Plus } from "lucide-react";
 import { Switch } from "../ui/switch";
-import { Badge } from "../ui/badge";
 import { generateSong, type GenerateRequest } from "@/actions/generation";
 
 const inspirationTags = [

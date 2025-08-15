@@ -126,6 +126,11 @@ export default function SoundBar() {
                 >
                   {track?.title}
                 </p>
+                {track.instrumental && (
+                  <p className="text-muted-foreground truncate text-[11px]">
+                    Instrumental
+                  </p>
+                )}
                 <p
                   className="text-muted-foreground w-full truncate text-xs"
                   title={track.createdByUserName!}

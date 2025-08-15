@@ -1,4 +1,5 @@
 import { getPresignedUrl } from "@/actions/generation";
+import NavWithSearch from "@/components/NavbarHome";
 import { SongCard } from "@/components/SongCard";
 import { auth } from "@/lib/auth";
 import { db } from "@/server/db";
@@ -106,7 +107,8 @@ export default async function Page() {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold tracking-tight">Discover Music</h1>
+      {/* <h1 className="text-3xl font-bold tracking-tight">Discover Music</h1> */}
+      <NavWithSearch userId={userId} songs={songsWithUrl} />
 
       {/* Trending songs */}
       {trendingSongs.length > 0 && (

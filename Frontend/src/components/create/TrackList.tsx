@@ -79,6 +79,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
       artwork: track.thumbnailUrl,
       prompt: track.prompt,
       createdByUserName: track.createdByUserName,
+      instrumental:track.instrumental
     });
   };
 
@@ -225,7 +226,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
                         )}
 
                         {isplayTrackId === track.id && (
-                          <div className="group absolute inset-0 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity">
                             <Music className="text-white" />
                           </div>
                         )}

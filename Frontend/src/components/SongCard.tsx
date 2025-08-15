@@ -48,6 +48,7 @@ export function SongCard({
       artwork: song.thumbnailUrl,
       prompt: song.prompt,
       createdByUserName: song.user.name,
+      instrumental: song.instrumental,
     });
 
     setIsLoading(false);
@@ -95,7 +96,16 @@ export function SongCard({
 
         <h3 className="mt-2 truncate text-sm font-medium text-gray-900">
           {song.title}
+          {song.instrumental && (
+            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500">
+              Instrumental
+            </span>
+          )}
         </h3>
+        {/* 
+        {song.instrumental && (
+          <p className="text-[11px] text-gray-400">Instrumental</p>
+        )} */}
 
         <p className="text-xs text-gray-500">{song.user.name}</p>
 
