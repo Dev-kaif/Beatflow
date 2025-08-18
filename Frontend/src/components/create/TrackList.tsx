@@ -79,7 +79,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
       artwork: track.thumbnailUrl,
       prompt: track.prompt,
       createdByUserName: track.createdByUserName,
-      instrumental:track.instrumental
+      instrumental: track.instrumental,
     });
   };
 
@@ -89,11 +89,16 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
-  const filteredTracks = tracks.filter(
-    (track) =>
-      track.title?.toLowerCase().includes(searchQuery.toLowerCase()) ??
-      track.prompt?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredTracks = tracks.filter((track) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      track.title?.toLowerCase().includes(q) ??
+      track.prompt?.toLowerCase().includes(q)
+    );
+  });
+
+  console.log(tracks);
 
   return (
     <div className="flex flex-1 flex-col overflow-y-scroll">

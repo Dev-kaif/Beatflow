@@ -142,7 +142,12 @@ export default function SoundBar() {
 
             {/* Centered controls */}
             <div className="absolute left-1/2 -translate-x-1/2">
-              <Button variant="ghost" size="icon" onClick={togglePlay}>
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:text-white cursor-pointer "
+                variant="ghost"
+                size="icon"
+                onClick={togglePlay}
+              >
                 {isPlaying ? (
                   <Pause className="h-4 w-4" />
                 ) : (

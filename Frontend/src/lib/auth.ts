@@ -12,9 +12,9 @@ const polarClient = new Polar({
     server: "sandbox",
 });
 
-const productLow = env.PRODUCT_ID_MIN as string
-const productMid = env.PRODUCT_ID_MID as string
-const productMax = env.PRODUCT_ID_MAX as string
+const productLow = env.PRODUCT_ID_MIN;
+const productMid = env.PRODUCT_ID_MID;
+const productMax = env.PRODUCT_ID_MAX;
 
 export const auth = betterAuth({
     database: prismaAdapter(db, {
@@ -80,7 +80,7 @@ export const auth = betterAuth({
                             slug: "High",
                         },
                     ],
-                    successUrl: "/",
+                    successUrl: "/home",
                     authenticatedUsersOnly: true,
                 }),
                 portal(),

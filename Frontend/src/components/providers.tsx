@@ -15,7 +15,6 @@ export function Providers({ children }: { children: ReactNode }) {
       navigate={(...args) => router.push(...args)}
       replace={(...args) => router.replace(...args)}
       onSessionChange={() => {
-        // Clear router cache (protected routes)
         router.refresh();
       }}
       Link={Link}

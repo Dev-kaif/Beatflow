@@ -23,7 +23,7 @@ export const GenerateSong = inngest.createFunction(
       key: "event.data.userId",
     },
 
-    onFailure: async ({ event, error }) => {
+    onFailure: async ({ event }) => {
       await db.song.update({
         where: {
           id: (event?.data?.event?.data as { songId: string }).songId,
@@ -116,7 +116,7 @@ export const GenerateSong = inngest.createFunction(
       },
     );
 
-    if (credits < 0) {
+    if (credits <= 0) {
       await step.run("set-status-no-credits", async () => {
         return await db.song.update({
           where: {

@@ -71,7 +71,7 @@ export default async function Page() {
     .filter(
       (song) =>
         !trendingSongIds.has(song.id) &&
-        // !popularSongsIds.has(song.id) &&
+        !popularSongsIds.has(song.id) &&
         song.categories.length > 0,
     )
     .reduce(
