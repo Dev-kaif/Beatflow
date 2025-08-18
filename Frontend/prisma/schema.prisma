@@ -23,14 +23,14 @@ model User {
   credits       Int       @default(5)
   likes         Like[]
   songs         Song[]
-
+  ipAddress     String?
   @@unique([email])
   @@map("user")
 }
 
 model Song {
   id                String   @id @default(uuid())
-  title             String
+  title             String?
   s3Key             String?
   thumbnailUrl      String?
   status            String   @default("queued")

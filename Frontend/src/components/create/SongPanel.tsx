@@ -84,7 +84,9 @@ export function SongPanel() {
 
     if (mode === "simple") {
       requestBody = {
-        fullDescribedSong: description,
+        fullDescribedSong:
+          description +
+          "\n Never use `Whisper` or `Neon` in the lyrics unless its very important to the song",
         instrumental,
       };
     } else {
@@ -98,7 +100,9 @@ export function SongPanel() {
       } else {
         requestBody = {
           prompt,
-          describedLyrics: lyrics,
+          describedLyrics:
+            lyrics +
+            "\n Never use `Whisper` or `Neon` in the lyrics unless its very important to the song",
           instrumental,
         };
       }

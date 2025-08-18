@@ -7,6 +7,7 @@ interface PlayerTrack {
   artwork?: string | null;
   prompt: string | null;
   createdByUserName: string | null;
+  instrumental:boolean;
 }
 
 interface PlayerState {

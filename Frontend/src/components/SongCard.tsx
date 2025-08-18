@@ -69,7 +69,7 @@ export function SongCard({
         <div className="group relative aspect-square w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75">
           {song.thumbnailUrl ? (
             <Image
-              alt={song.title}
+              alt={song.title || "" }
               width={200}
               height={200}
               unoptimized

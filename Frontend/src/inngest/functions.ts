@@ -155,6 +155,7 @@ export const GenerateSong = inngest.createFunction(
               s3_key: string;
               cover_image_s3_key: string;
               categories: string[];
+              title:string;
             })
           : null;
 
@@ -164,6 +165,7 @@ export const GenerateSong = inngest.createFunction(
             s3Key: responseData?.s3_key ?? null,
             thumbnailUrl: responseData?.cover_image_s3_key ?? null,
             status: response.ok ? "processed" : "failed",
+            title:responseData?.title ?? "Untitle"
           },
         });
 

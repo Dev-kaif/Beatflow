@@ -22,8 +22,13 @@ export const env = createEnv({
     GENERATE_FROM_DESCRIPTION: z.string(),
     GENERATE_FROM_DESCRIBED_LYRICS: z.string(),
     GENERATE_WITH_LYRICS: z.string(),
-    // POLAR_ACCESS_TOKEN: z.string(),
-    // POLAR_WEBHOOK_SECRET: z.string(),
+    POLAR_ACCESS_TOKEN: z.string(),
+    POLAR_WEBHOOK_SECRET: z.string(),
+    PRODUCT_ID_MIN: z.string(),
+    PRODUCT_ID_MID: z.string(),
+    PRODUCT_ID_MAX: z.string(),
+    UPSTASH_REDIS_REST_URL: z.string(),
+    UPSTASH_REDIS_REST_TOKEN: z.string(),
   },
 
   /**
@@ -58,8 +63,14 @@ export const env = createEnv({
     GENERATE_FROM_DESCRIPTION: process.env.GENERATE_FROM_DESCRIPTION,
     GENERATE_FROM_DESCRIBED_LYRICS: process.env.GENERATE_WITH_DESCRIBED_LYRICS,
     GENERATE_WITH_LYRICS: process.env.GENERATE_WITH_LYRICS,
-    // POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN,
-    // POLAR_WEBHOOK_SECRET: process.env.POLAR_WEBHOOK_SECRET,
+    POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN,
+    POLAR_WEBHOOK_SECRET: process.env.POLAR_WEBHOOK_SECRET,
+    PRODUCT_ID_MIN: process.env.NEXT_PUBLIC_PRODUCT_ID_MIN ,
+    PRODUCT_ID_MID: process.env.NEXT_PUBLIC_PRODUCT_ID_MID,
+    PRODUCT_ID_MAX: process.env.NEXT_PUBLIC_PRODUCT_ID_MAX,
+    
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

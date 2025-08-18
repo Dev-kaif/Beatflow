@@ -36,21 +36,14 @@ export async function queueSong(
   guidanceScale: number,
   userId: string,
 ) {
-  let title = "Untitled";
-  if (generateRequest.describedLyrics) title = generateRequest.describedLyrics;
-  if (generateRequest.fullDescribedSong)
-    title = generateRequest.fullDescribedSong;
-
-  title = title.charAt(0).toUpperCase() + title.slice(1);
 
   const song = await db.song.create({
     data: {
       userId: userId,
-      title: title,
       prompt: generateRequest.prompt,
       lyrics: generateRequest.lyrics,
-      describedLyrics: generateRequest.describedLyrics + "Never use `Whisper` or `Neon` in the lyrics unless its very important to the song",
-      fullDescribedSong: generateRequest.fullDescribedSong + "Never use `Whisper` or `Neon` in the lyrics unless its very important to the song",
+      describedLyrics: generateRequest.describedLyrics,
+      fullDescribedSong: generateRequest.fullDescribedSong,
       instrumental: generateRequest.instrumental,
       guidanceScale: guidanceScale,
       audioDuration: 180,
