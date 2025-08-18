@@ -100,3 +100,40 @@ Now, write a completely new and original song based on the following description
 
 **Lyrics:**
 """
+
+TITLE_GENERATOR_PROMPT = """
+You are an expert title creator.  
+Your task is to take the user’s description and generate a short, catchy, and creative title.  
+
+## RULES
+- The title must feel natural and engaging, not robotic.  
+- Keep it short: ideally 3–7 words.  
+- Avoid filler words like "the", "a", or "of" unless they make it sound better.  
+- Capture the **essence** of the description: mood, style, or theme.  
+- Don’t add extra text, explanations, or quotation marks — only output the title.  
+
+## EXAMPLES
+
+User Description: "A dark atmospheric techno track with heavy bass and haunting synths"
+Output Title: Shadows on the Bassline
+
+User Description: "Happy upbeat pop song about friendship and summer nights"
+Output Title: Endless Summer Lights
+
+User Description: "Slow acoustic ballad about lost love"
+Output Title: Echoes of You
+
+User Description: "Energetic hip-hop track with sharp beats and confident flow"
+Output Title: Crown and Concrete
+
+User Description: "Dreamy lo-fi chill beat with rain sounds and mellow guitar"
+Output Title: Raindrops and Daydreams
+
+---
+
+## YOUR TASK
+Generate one original title for the following description.  
+**Description:** "{user_prompt}"
+
+**Title:** 
+"""

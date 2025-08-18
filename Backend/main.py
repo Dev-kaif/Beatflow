@@ -9,7 +9,11 @@ from botocore.client import Config
 
 from pydantic import BaseModel
 
-from prompts import LYRICS_GENERATOR_PROMPT, PROMPT_GENERATOR_PROMPT
+from prompts import (
+    LYRICS_GENERATOR_PROMPT,
+    PROMPT_GENERATOR_PROMPT,
+    TITLE_GENERATOR_PROMPT
+)
 
 app = modal.App("music-genrator")
 
@@ -58,6 +62,7 @@ class GenrateWithDescribedLyricsRequest(AudioGenrationBase):
 
 class GenrateMusicResponseS3(BaseModel):
     s3_key: str
+    title: str
     cover_image_s3_key: str
     categories: List[str]
 
@@ -91,8 +96,7 @@ class MusicGenServer:
         )
 
         # llm model
-        # model_id = "Qwen/Qwen2-7B-Instruct"
-        model_id = "Qwen/Qwen2.5-7B-Instruct"
+        model_id = "Qwen/Qwen2-7B-Instruct"
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
 
         self.llm_model = AutoModelForCausalLM.from_pretrained(
@@ -130,13 +134,20 @@ class MusicGenServer:
         response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[
             0
         ]
-
+        
         return response
 
     # Genrate Tags
     def generate_prompt(self, desc: str):
         # insert description
         full_prompt = PROMPT_GENERATOR_PROMPT.format(user_prompt=desc)
+
+        # Run LLM and Return the response
+        return self.qwen_prompt(full_prompt)
+    
+    def generate_title(self, desc: str):
+        # insert description
+        full_prompt = TITLE_GENERATOR_PROMPT.format(user_prompt=desc)
 
         # Run LLM and Return the response
         return self.qwen_prompt(full_prompt)
@@ -184,8 +195,6 @@ class MusicGenServer:
         )
 
         final_lyrics = "[instrumental]" if instrumental else lyrics
-        # print(f"Generated lyrics: \n{final_lyrics}")
-        # print(f"Prompt: \n{prompt}")
 
         output_dir = "/tmp/outputs"
         os.makedirs(output_dir, exist_ok=True)
@@ -223,11 +232,14 @@ class MusicGenServer:
 
         # Category Genration
         categories = self.generate_categories(description_for_categorization)
+        
+        title = self.generate_title(final_lyrics)
 
         return GenrateMusicResponseS3(
             s3_key=audio_s3_key_name,
             cover_image_s3_key=image_s3_key_name,
             categories=categories,
+            title=title
         )
 
     # Generate Song from Song Description
@@ -236,8 +248,6 @@ class MusicGenServer:
         self, request: GenrateFromDescriptionRequest
     ) -> GenrateMusicResponseS3:
         prompt = self.generate_prompt(request.full_described_song)
-
-        # print(f"prompt {prompt}")
 
         # Generating lyrics
         lyrics = ""
@@ -287,13 +297,17 @@ def main():
 
     request_data = GenrateFromDescriptionRequest(
         full_described_song="An energetic, fast-paced hip-hop track in a minor key. The lyrics should be from the perspective of an old-school rapper who feels like a ghost in the new era of viral social media trends. He's reflecting on his legacy with a mix of pride and defiance",
-        guidance_scale=15,
+        guidance_scale=20,
     )
 
     payload = request_data.model_dump()
 
+    headers = {
+        "Modal-Secret": "ws-kBEH8zM9LpZ8kvGlaMRNsM",
+        "Modal-Key": "wk-T9cNEJygGkALWGUKG2Rmgi",
+    }
 
-    response = requests.post(endpoint_url, json=payload)
+    response = requests.post(endpoint_url, json=payload, headers=headers)
     response.raise_for_status()
 
     result = GenrateMusicResponseS3(**response.json())
