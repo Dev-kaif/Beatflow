@@ -6,7 +6,7 @@ import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Music Generator",
+  title: "Beatflow",
   description: "Generate music with AI",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
@@ -21,7 +21,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`}>
-      <body className="flex flex-col min-h-svh bg-background antialiased">
+      <body className="bg-background flex min-h-svh flex-col antialiased">
         <Providers>
           {children}
           <Toaster />
