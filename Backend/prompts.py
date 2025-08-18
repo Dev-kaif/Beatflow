@@ -25,6 +25,8 @@ The examples provided below are for formatting and style guidance only.
 **IMPORTANT: DO NOT use any specific words, phrases, or themes from the examples in your final output. Be original.**
 
 The lyrics should be structured like a real song. Use tags like [intro], [verse], [pre-chorus], [chorus], [bridge], and [outro] to define the sections.
+INSTRUCTION:
+**NEVER EVER use `Whisper` or `echos` or `Neon` in the lyrics unless user asks**
 
 ---
 ### EXAMPLES FOR STYLE AND FORMATTING
@@ -57,7 +59,7 @@ That old wooden porch still looks the same
 Been ten long years of whiskey and rain
 Came back here to forget the pain
 
-[chorus]
+[chorus]whi
 And oh, the ghost of you is in this town
 In every shadow, I see you turn around
 This heart's a freight train on a track that's rustin' down
