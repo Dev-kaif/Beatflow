@@ -19,6 +19,11 @@ export const auth = betterAuth({
     database: prismaAdapter(db, {
         provider: "postgresql",
     }),
+    trustedOrigins: ["http://localhost:3000", "https://www.beatflow.art"],
+    cookies: {
+        secure: false,
+        sameSite: "lax",
+    },
     databaseHooks: {
         user: {
             create: {
@@ -90,16 +95,16 @@ export const auth = betterAuth({
                         const productId = order.data.product.id;
 
                         let CreditsToAdd = 0;
-                        let package_tier = "free"
+                        let package_tier = "free";
 
                         switch (productId) {
                             case productMid: // Medium
                                 CreditsToAdd = 10;
-                                package_tier="starter"
+                                package_tier = "starter";
                                 break;
                             case productMax: // High
                                 CreditsToAdd = 30;
-                                package_tier="creator"
+                                package_tier = "creator";
                                 break;
                         }
 
