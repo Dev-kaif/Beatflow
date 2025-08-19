@@ -31,7 +31,7 @@ export default function NavWithSearch({ userId, songs }: MusicPageProps) {
     const query = debouncedSearch.toLowerCase();
 
     return songs.filter((song) => {
-      const titleMatch = song.title.toLowerCase().includes(query);
+      const titleMatch = song.title!.toLowerCase().includes(query);
       const categoryMatch = song.categories.some((c) =>
         c.name.toLowerCase().includes(query),
       );
