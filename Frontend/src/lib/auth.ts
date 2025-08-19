@@ -52,16 +52,16 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: true,
     },
-    // socialProviders: {
-    //   google: {
-    //       clientId: process.env.GOOGLE_CLIENT_ID as string,
-    //       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    //   },
-    //   github: {
-    //     clientId: process.env.GITHUB_CLIENT_ID as string,
-    //     clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    //   },
-    // },
+    socialProviders: {
+        google: {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+        github: {
+            clientId: env.GITHUB_CLIENT_ID,
+            clientSecret: env.GITHUB_CLIENT_SECRET,
+        },
+    },
     plugins: [
         ipRateLimitPlugin(),
         polar({
