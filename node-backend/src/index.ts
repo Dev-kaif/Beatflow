@@ -136,6 +136,11 @@ app.post("/process-audio", async (req, res) => {
   }
 });
 
+app.get("/ping", (req, res) => {
+  console.log("Ping received! 🏓");
+  res.status(200).json({ message: "pong" });
+});
+
 // --- Start the Server ---
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
