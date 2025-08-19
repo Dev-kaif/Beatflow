@@ -12,7 +12,6 @@ const polarClient = new Polar({
     server: "sandbox",
 });
 
-const productLow = env.PRODUCT_ID_MIN;
 const productMid = env.PRODUCT_ID_MID;
 const productMax = env.PRODUCT_ID_MAX;
 
@@ -67,10 +66,6 @@ export const auth = betterAuth({
                 checkout({
                     products: [
                         {
-                            productId: productLow,
-                            slug: "Low",
-                        },
-                        {
                             productId: productMid,
                             slug: "Medium",
                         },
@@ -104,7 +99,7 @@ export const auth = betterAuth({
                                 break;
                             case productMax: // High
                                 CreditsToAdd = 30;
-                                package_tier="creater"
+                                package_tier="creator"
                                 break;
                         }
 

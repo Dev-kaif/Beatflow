@@ -79,8 +79,16 @@ export function SongCard({
           )}
 
           {/* Loader */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 transition-transform group-hover:scale-105">
+          <div
+            className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${
+              isLoading ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            <div
+              className={`flex h-12 w-12 items-center justify-center rounded-full bg-black/60 transition-transform ${
+                isLoading ? "scale-105" : "group-hover:scale-105"
+              }`}
+            >
               {isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin text-white" />
               ) : (

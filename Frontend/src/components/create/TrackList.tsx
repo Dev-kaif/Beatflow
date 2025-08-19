@@ -49,6 +49,7 @@ export interface Track {
 export function TrackList({ tracks }: { tracks: Track[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null);
   const [isplayTrackId, setIsplayTrackId] = useState<string | null>(null);
   const [trackToRename, setTrackToRename] = useState<Track | null>(null);
@@ -99,13 +100,23 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
   });
 
   const downloadSong = async (trackId: string) => {
-    const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
-    const blob = await res.blob();
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${trackId}.mp3`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    try {
+      setIsDownloading(true); // start loader
+
+      const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
+      if (!res.ok) throw new Error("Failed to download track");
+
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${trackId}.mp3`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Download failed:", error);
+    } finally {
+      setIsDownloading(false); // stop loader no matter what
+    }
   };
 
   return (
@@ -291,9 +302,16 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
                           <DropdownMenuContent align="end" className="w-40">
                             <DropdownMenuItem
                               onClick={async () => await downloadSong(track.id)}
+                              className="flex items-center"
                             >
-                              <Download className="mr-2" /> Download
+                              {isDownloading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin text-gray-500" />
+                              ) : (
+                                <Download className="mr-2 h-4 w-4" />
+                              )}
+                              Download
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={async (e) => {
                                 e.stopPropagation();

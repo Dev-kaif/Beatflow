@@ -6,7 +6,6 @@ export default function Upgrade() {
   const handleUpgrade = async () => {
     await authClient.checkout({
       products: [
-        process.env.NEXT_PUBLIC_PRODUCT_ID_MIN!,
         process.env.NEXT_PUBLIC_PRODUCT_ID_MID!,
         process.env.NEXT_PUBLIC_PRODUCT_ID_MAX!,
       ],

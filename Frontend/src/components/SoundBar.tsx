@@ -1,6 +1,14 @@
 "use client";
 
-import { Download, Music, Pause, Play, Volume2, X } from "lucide-react";
+import {
+  Download,
+  Loader2,
+  Music,
+  Pause,
+  Play,
+  Volume2,
+  X,
+} from "lucide-react";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -11,6 +19,7 @@ import Image from "next/image";
 export default function SoundBar() {
   const { track, setTrack } = usePlayerStore();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [volume, setVolume] = useState([100]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -100,13 +109,23 @@ export default function SoundBar() {
   if (!track) return null;
 
   const downloadSong = async (trackId: string) => {
-    const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
-    const blob = await res.blob();
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${trackId}.mp3`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    try {
+      setIsDownloading(true); 
+
+      const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
+      if (!res.ok) throw new Error("Failed to download track");
+
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${trackId}.mp3`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Download failed:", error);
+    } finally {
+      setIsDownloading(false); 
+    }
   };
 
   return (
@@ -179,8 +198,16 @@ export default function SoundBar() {
                   className="w-16"
                 />
               </div>
-              <Button variant={"ghost"} onClick={() => downloadSong(track.id)}>
-                <Download className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                onClick={() => downloadSong(track.id)}
+                disabled={isDownloading} // optionally disable while downloading
+              >
+                {isDownloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-current" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
               </Button>
 
               <Button
