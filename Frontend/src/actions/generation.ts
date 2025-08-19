@@ -16,6 +16,7 @@ import { headers } from "next/headers";
 import { PassThrough, Readable } from "stream";
 import { spawn } from "child_process";
 import { Upload } from "@aws-sdk/lib-storage";
+import path from "path";
 
 export interface GenerateRequest {
   prompt?: string;
@@ -217,9 +218,8 @@ export async function getPlayUrl(songId: string) {
     select: {
       id: true,
       s3Key: true,
-      user: { select: { id: true, package: true } },
     },
-  })) as SongWithUser;
+  })) ;
 
   if (!song) throw new Error("Song not found or not accessible");
 
@@ -280,14 +280,25 @@ export async function getDownloadUrl(songId: string) {
       s3Key: true,
       userId: true,
       published: true,
-      user: { select: { package: true } },
     },
+  });
+
+  const user = await db.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select:
+    {
+      package:true
+    }
   });
 
   if (!song) throw new Error("Song not found or not accessible");
 
   const isOwner = song.userId === session.user.id;
-  const userPackage = song.user?.package ?? "free";
+  const userPackage = user?.package ?? "free";
+
+  console.log(user?.package, userPackage === "creator");
 
   // Free package
   if (userPackage === "free") {
@@ -302,10 +313,28 @@ export async function getDownloadUrl(songId: string) {
     } else {
       // 30s preview
       const previewKey = song.s3Key?.replace(/\.wav$/, "-30s-preview.mp3");
+
+      const watermarkPath = path.join(process.cwd(), "public/watermark.wav");
+
       return transcodeAndUpload({
         srcKey: song.s3Key!,
         dstKey: previewKey!,
-        args: ["-t", "30", "-f", "mp3", "-b:a", "128k"],
+        args: [
+          "-t",
+          "30", // take first 30 seconds
+          "-i",
+          song.s3Key!, // original audio
+          "-i",
+          watermarkPath, // watermark audio
+          "-filter_complex",
+          "[0:a][1:a]concat=n=2:v=0:a=1[a]", // concatenate
+          "-map",
+          "[a]",
+          "-f",
+          "mp3",
+          "-b:a",
+          "128k",
+        ],
       });
     }
   }
@@ -328,7 +357,6 @@ export async function getDownloadUrl(songId: string) {
 
   // Creator package
   if (userPackage === "creator") {
-    // wav for both owner + published
     return getPresignedUrlForDownload(song.s3Key!);
   }
 
