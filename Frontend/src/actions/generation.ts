@@ -17,6 +17,8 @@ import { PassThrough, Readable } from "stream";
 import { spawn } from "child_process";
 import { Upload } from "@aws-sdk/lib-storage";
 import path from "path";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import fsPromises from "fs/promises";
 
 export interface GenerateRequest {
   prompt?: string;
@@ -108,7 +110,6 @@ export async function uploadTempObject(
     const pass = new PassThrough();
     body.pipe(pass);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const upload = new (Upload as new (options: unknown) => Upload)({
       client: s3,
       params: {
@@ -122,7 +123,6 @@ export async function uploadTempObject(
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     await upload.done();
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -147,7 +147,6 @@ async function objectExists(key: string): Promise<boolean> {
   }
 }
 
-import fsPromises from "fs/promises";
 
 /* ------------------ FFmpeg Helpers ------------------ */
 export async function transcodeWithWatermark({
@@ -194,7 +193,7 @@ export async function transcodeWithWatermark({
 
   // Run FFmpeg
   await new Promise<void>((resolve, reject) => {
-    const ffmpeg = spawn("ffmpeg", args);
+    const ffmpeg = spawn(ffmpegInstaller.path, args);
     ffmpeg.on("error", reject);
     ffmpeg.on("close", (code) => {
       if (code !== 0)
@@ -406,7 +405,13 @@ async function transcodeAndUpload({
   const wavStream: Readable = await getObject(srcKey);
 
   return new Promise<string>((resolve, reject) => {
-    const ffmpeg = spawn("ffmpeg", ["-y", "-i", "pipe:0", ...args, "pipe:1"]);
+    const ffmpeg = spawn(ffmpegInstaller.path, [
+      "-y",
+      "-i",
+      "pipe:0",
+      ...args,
+      "pipe:1",
+    ]);
     const pass = new PassThrough();
 
     wavStream.pipe(ffmpeg.stdin);
