@@ -195,10 +195,6 @@ export async function transcodeWithWatermark({
   // Run FFmpeg
   await new Promise<void>((resolve, reject) => {
     const ffmpeg = spawn("ffmpeg", args);
-    ffmpeg.stderr.on("data", (chunk) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      console.log("ffmpeg:", chunk.toString()),
-    );
     ffmpeg.on("error", reject);
     ffmpeg.on("close", (code) => {
       if (code !== 0)
@@ -439,4 +435,3 @@ async function transcodeAndUpload({
       .catch(reject);
   });
 }
-
