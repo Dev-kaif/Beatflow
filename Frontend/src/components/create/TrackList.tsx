@@ -76,7 +76,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
     setTrack({
       id: track.id,
       title: track.title,
-      url: playUrl!,
+      url: playUrl,
       artwork: track.thumbnailUrl,
       prompt: track.prompt,
       createdByUserName: track.createdByUserName,

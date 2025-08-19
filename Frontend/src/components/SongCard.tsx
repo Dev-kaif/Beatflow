@@ -2,7 +2,7 @@
 
 import type { Category, Like, Song } from "@prisma/client";
 import { Heart, Loader2, Music, Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getPlayUrl } from "@/actions/generation";
 import { toggleLikeSong } from "@/actions/song";
 import { usePlayerStore } from "@/stores/usePlayerStore";
@@ -40,7 +40,7 @@ export function SongCard({
     setTrack({
       id: song.id,
       title: song.title,
-      url: playUrl!,
+      url: playUrl,
       artwork: song.thumbnailUrl,
       prompt: song.prompt,
       createdByUserName: song.user.name,

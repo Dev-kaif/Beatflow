@@ -116,8 +116,8 @@ async function processAudioOnWorker({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      "x-api-key": env.AUDIO_WORKER_API_KEY, // This is now fully typed!
+      // eslint-disable-next-line
+      "x-api-key": env.AUDIO_WORKER_API_KEY, 
     },
     body: JSON.stringify({
       task,
