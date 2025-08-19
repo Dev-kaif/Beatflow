@@ -27,7 +27,6 @@ export const auth = betterAuth({
                     type ContextWithMetadata = { metadata?: { ip?: string | null } };
                     const ctx = context as ContextWithMetadata;
                     const ip = ctx.metadata?.ip ?? "unknown";
-                    console.log("🔥 User created! IP:", ip, user);
 
                     if (ip) {
                         await db.user.update({
@@ -96,16 +95,16 @@ export const auth = betterAuth({
                         const productId = order.data.product.id;
 
                         let CreditsToAdd = 0;
+                        let package_tier = "free"
 
                         switch (productId) {
-                            case productLow: // Low
-                                CreditsToAdd = 5;
-                                break;
                             case productMid: // Medium
                                 CreditsToAdd = 10;
+                                package_tier="starter"
                                 break;
                             case productMax: // High
-                                CreditsToAdd = 25;
+                                CreditsToAdd = 30;
+                                package_tier="creater"
                                 break;
                         }
 
@@ -114,6 +113,7 @@ export const auth = betterAuth({
                                 id: externalCustomerId,
                             },
                             data: {
+                                package: package_tier,
                                 credits: {
                                     increment: CreditsToAdd,
                                 },

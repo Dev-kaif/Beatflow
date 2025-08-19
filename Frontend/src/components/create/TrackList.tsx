@@ -75,7 +75,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
     setTrack({
       id: track.id,
       title: track.title,
-      url: playUrl,
+      url: playUrl!,
       artwork: track.thumbnailUrl,
       prompt: track.prompt,
       createdByUserName: track.createdByUserName,
@@ -98,7 +98,15 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
     );
   });
 
-  console.log(tracks);
+  const downloadSong = async (trackId: string) => {
+    const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
+    const blob = await res.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${trackId}.mp3`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
 
   return (
     <div className="flex flex-1 flex-col overflow-y-scroll">
@@ -221,7 +229,13 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
                         )}
 
                         {isplayTrackId !== track.id && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
+                          <div
+                            className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity ${
+                              loadingTrackId === track.id
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100"
+                            }`}
+                          >
                             {loadingTrackId === track.id ? (
                               <Loader2 className="animate-spin text-white" />
                             ) : (
@@ -276,11 +290,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-40">
                             <DropdownMenuItem
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                const playUrl = await getPlayUrl(track.id);
-                                window.open(playUrl!, "_blank");
-                              }}
+                              onClick={async () => await downloadSong(track.id)}
                             >
                               <Download className="mr-2" /> Download
                             </DropdownMenuItem>

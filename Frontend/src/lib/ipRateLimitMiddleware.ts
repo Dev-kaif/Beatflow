@@ -60,7 +60,6 @@ export const ipRateLimitPlugin = (): BetterAuthPlugin => ({
             const existingUser = await db.user.findFirst({
               where: { ipAddress: safeIp },
             });
-            console.log(existingUser);
 
             if (existingUser)
               return jsonResponse(

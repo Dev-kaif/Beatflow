@@ -99,6 +99,16 @@ export default function SoundBar() {
 
   if (!track) return null;
 
+  const downloadSong = async (trackId: string) => {
+    const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
+    const blob = await res.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${trackId}.mp3`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
   return (
     <div className="px-4 pb-2">
       <Card className="bg-background/60 relative w-full shrink-0 border-t py-0 backdrop-blur">
@@ -143,7 +153,7 @@ export default function SoundBar() {
             {/* Centered controls */}
             <div className="absolute left-1/2 -translate-x-1/2">
               <Button
-                className="bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:text-white cursor-pointer "
+                className="cursor-pointer bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:text-white"
                 variant="ghost"
                 size="icon"
                 onClick={togglePlay}
@@ -169,13 +179,7 @@ export default function SoundBar() {
                   className="w-16"
                 />
               </div>
-              <Button
-                variant={"ghost"}
-                onClick={() => {
-                  if (!track?.url) return;
-                  window.open(track?.url, "_blank");
-                }}
-              >
+              <Button variant={"ghost"} onClick={() => downloadSong(track.id)}>
                 <Download className="h-4 w-4" />
               </Button>
 

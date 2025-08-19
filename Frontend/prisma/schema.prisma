@@ -20,10 +20,11 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-  credits       Int       @default(5)
+  credits       Int       @default(3)
   likes         Like[]
   songs         Song[]
   ipAddress     String?
+  package        String   @default("free")
   @@unique([email])
   @@map("user")
 }

@@ -649,7 +649,7 @@ export default function LandingPage({
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />5 Credits / month
+                      <Check className="mr-2 text-green-500" />3 Credits / month
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -684,7 +684,7 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      50 Credits
+                      30 Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -696,7 +696,7 @@ export default function LandingPage({
                     </li>
                   </ul>
                   <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white">
-                    Buy Creator Pack
+                    Unlock 30 Credits
                   </Button>
                 </CardContent>
               </Card>
@@ -716,7 +716,7 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      20 Credits
+                      10 Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -728,7 +728,7 @@ export default function LandingPage({
                     </li>
                   </ul>
                   <Button variant="outline" className="w-full">
-                    Buy Starter Pack
+                    Get Starter Pack
                   </Button>
                 </CardContent>
               </Card>

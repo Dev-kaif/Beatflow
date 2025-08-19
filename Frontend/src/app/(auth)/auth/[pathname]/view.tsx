@@ -1,8 +1,9 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "@daveyplate/better-auth-ui";
-import { ArrowLeft, Link } from "lucide-react";
+import { ArrowLeft} from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,14 +16,16 @@ export function AuthView({ pathname }: { pathname: string }) {
         <motion.nav className="fixed top-0 z-50 w-full transition-colors duration-300">
           <div className="mx-auto h-20 max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-full items-center justify-between border-b border-transparent transition-colors duration-300">
-              <Image
-                className="h-12 w-auto sm:h-14 lg:h-20"
-                alt="Beatflow logo"
-                src="/mainLogo.png"
-                width={160}
-                height={64}
-                priority
-              />
+              <a href="/">
+                <Image
+                  className="h-12 w-auto sm:h-14 lg:h-20"
+                  alt="Beatflow logo"
+                  src="/mainLogo.png"
+                  width={200}
+                  height={80}
+                  priority
+                />
+              </a>
               <Button
                 variant={"link"}
                 onClick={() => router.back()}
@@ -34,8 +37,8 @@ export function AuthView({ pathname }: { pathname: string }) {
             </div>
           </div>
         </motion.nav>
-        <div className="mt-20 w-full flex justify-center items-center">
-          <AuthCard pathname={pathname} />
+        <div className="mt-20 flex w-full items-center justify-center">
+          <AuthCard redirectTo="/home" pathname={pathname} />
         </div>
       </div>
     </main>

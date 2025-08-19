@@ -31,10 +31,6 @@ export function SongCard({
     song.likes ? song.likes.some((like) => like.userId === userId) : false,
   );
 
-  useEffect(() => {
-    console.log(song.likes);
-  });
-
   const [likesCount, setLikesCount] = useState(song._count.likes);
 
   const handlePlay = async () => {
@@ -44,7 +40,7 @@ export function SongCard({
     setTrack({
       id: song.id,
       title: song.title,
-      url: playUrl,
+      url: playUrl!,
       artwork: song.thumbnailUrl,
       prompt: song.prompt,
       createdByUserName: song.user.name,
