@@ -59,7 +59,7 @@ export const auth = betterAuth({
     //   },
     // },
     plugins: [
-        ipRateLimitPlugin(),
+        // ipRateLimitPlugin(),
         polar({
             client: polarClient,
             createCustomerOnSignUp: true,

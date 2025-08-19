@@ -84,7 +84,7 @@ export function SongPanel() {
 
     if (mode === "simple") {
       requestBody = {
-        fullDescribedSong: description + "At start and say made with Beatflow",
+        fullDescribedSong: description ,
         instrumental,
       };
     } else {

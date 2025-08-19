@@ -26,13 +26,6 @@ export interface GenerateRequest {
   instrumental?: boolean;
 }
 
-type SongWithUser = {
-  s3Key: string;
-  user: { id: string; package: Package } | null;
-};
-
-type Package = "free" | "starter" | "creator";
-
 const s3 = new S3Client({
   region: "auto",
   endpoint: `https://${env.AWS_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -154,7 +147,253 @@ async function objectExists(key: string): Promise<boolean> {
   }
 }
 
+import fsPromises from "fs/promises";
+
 /* ------------------ FFmpeg Helpers ------------------ */
+export async function transcodeWithWatermark({
+  srcKey, // S3 key of the song
+  watermarkPath, // local path to watermark
+  dstKey, // S3 destination key
+  duration = 30, // preview length in seconds
+}: {
+  srcKey: string;
+  watermarkPath?: string;
+  dstKey: string;
+  duration?: number;
+}): Promise<string> {
+  if (!watermarkPath && (await objectExists(dstKey))) {
+    return getPresignedUrl(dstKey);
+  }
+
+  // Download song to local temp file
+  const localSongPath = await downloadToTemp(srcKey);
+
+  // Temp output file
+  const tempOutputPath = path.join(
+    os.tmpdir(),
+    `${dstKey.replace(/\W/g, "_")}.mp3`,
+  );
+
+  // Build FFmpeg args
+  const args: string[] = ["-y"];
+  if (watermarkPath) {
+    args.push("-i", localSongPath, "-i", watermarkPath);
+    args.push(
+      "-filter_complex",
+      `[0:a]atrim=0:${duration},aresample=44100,asetpts=PTS-STARTPTS[a0];` +
+        `[1:a]aresample=44100,asetpts=PTS-STARTPTS[a1];` +
+        `[a0][a1]concat=n=2:v=0:a=1[a]`,
+      "-map",
+      "[a]",
+    );
+  } else {
+    args.push("-i", localSongPath);
+  }
+
+  args.push("-f", "mp3", "-b:a", "128k", tempOutputPath);
+
+  // Run FFmpeg
+  await new Promise<void>((resolve, reject) => {
+    const ffmpeg = spawn("ffmpeg", args);
+    ffmpeg.stderr.on("data", (chunk) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      console.log("ffmpeg:", chunk.toString()),
+    );
+    ffmpeg.on("error", reject);
+    ffmpeg.on("close", (code) => {
+      if (code !== 0)
+        return reject(new Error(`ffmpeg exited with code ${code}`));
+      resolve();
+    });
+  });
+
+  // Upload result back to S3
+  await uploadTempObject(dstKey, fs.createReadStream(tempOutputPath));
+
+  // Cleanup temp files
+  await fsPromises.unlink(localSongPath).catch(() => void 0); // ignore errors
+  await fsPromises.unlink(tempOutputPath).catch(() => void 0); // ignore errors
+
+  return getPresignedUrl(dstKey);
+}
+
+/* ------------------ Playback + Preview ------------------ */
+export async function getPlayUrl(songId: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) redirect("/auth/sign-in");
+
+  const song = await db.song.findFirst({
+    where: {
+      id: songId,
+      OR: [{ userId: session.user.id }, { published: true }],
+      s3Key: { not: null },
+    },
+    select: {
+      id: true,
+      s3Key: true,
+      userId: true,
+    },
+  });
+
+  const user = await db.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      package: true,
+    },
+  });
+
+  if (!song) throw new Error("Song not found or not accessible");
+
+  // bump listen count
+  await db.song.update({
+    where: { id: songId },
+    data: { listenCount: { increment: 1 } },
+  });
+
+  const userPackage = user?.package ?? "free";
+  const isOwner = session.user.id === song.userId;
+
+  if (userPackage === "free") {
+    const mp3Key = song.s3Key!.replace(/\.wav$/, ".mp3");
+    return transcodeAndUpload({
+      srcKey: song.s3Key!,
+      dstKey: mp3Key,
+      args: ["-f", "mp3", "-b:a", "192k"],
+    });
+  }
+
+  if (userPackage === "starter") {
+    if (isOwner) {
+      // starter users get full WAV for own songs
+      return getPresignedUrl(song.s3Key!);
+    } else {
+      // others' published songs → full MP3
+      const mp3Key = song.s3Key!.replace(/\.wav$/, "aaa.mp3");
+      return transcodeAndUpload({
+        srcKey: song.s3Key!,
+        dstKey: mp3Key,
+        args: ["-f", "mp3", "-b:a", "192k"],
+      });
+    }
+  }
+
+  if (userPackage === "creator") {
+    // creator users → always full WAV
+    return getPresignedUrl(song.s3Key!);
+  }
+}
+
+import fs from "fs";
+
+export async function getDownloadUrl(songId: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) redirect("/auth/sign-in");
+
+  const song = await db.song.findFirst({
+    where: {
+      id: songId,
+      OR: [{ userId: session.user.id }, { published: true }],
+      s3Key: { not: null },
+    },
+    select: {
+      id: true,
+      s3Key: true,
+      userId: true,
+      published: true,
+    },
+  });
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { package: true },
+  });
+
+  if (!song) throw new Error("Song not found or not accessible");
+
+  const isOwner = song.userId === session.user.id;
+  const userPackage = user?.package ?? "free";
+
+  // Free package
+  if (userPackage === "free") {
+    if (isOwner) {
+      // full mp3 of their own
+      const mp3Key = song.s3Key!.replace(/\.wav$/, ".mp3");
+      return transcodeWithWatermark({
+        srcKey: song.s3Key!,
+        dstKey: mp3Key,
+      });
+    } else {
+      // 30s preview + watermark
+      const previewKey = song.s3Key!.replace(/\.wav$/, "-30s-preview.mp3");
+      const watermarkPath = path.join(process.cwd(), "public/watermark.mp3");
+
+      return transcodeWithWatermark({
+        srcKey: song.s3Key!,
+        watermarkPath,
+        dstKey: previewKey,
+        duration: 30,
+      });
+    }
+  }
+
+  // Starter package
+  if (userPackage === "starter") {
+    if (isOwner) {
+      // own = wav
+      return getPresignedUrlForDownload(song.s3Key!);
+    } else {
+      // others published = mp3
+      const mp3Key = song.s3Key!.replace(/\.wav$/, ".mp3");
+      return transcodeWithWatermark({
+        srcKey: song.s3Key!,
+        dstKey: mp3Key,
+      });
+    }
+  }
+
+  // Creator package
+  if (userPackage === "creator") {
+    return getPresignedUrlForDownload(song.s3Key!);
+  }
+
+  throw new Error("Unsupported package type");
+}
+
+export async function getPresignedUrlForDownload(key: string): Promise<string> {
+  const command = new GetObjectCommand({
+    Bucket: env.S3_BUCKET_NAME,
+    Key: key,
+    ResponseContentDisposition: `attachment; filename="${key.split("/").pop()}"`,
+  });
+
+  return getSignedUrl(s3, command, { expiresIn: 3600 });
+}
+
+import os from "os";
+
+async function downloadToTemp(key: string, ext = ".wav"): Promise<string> {
+  const stream: Readable = await getObject(key);
+  const tempPath = path.join(os.tmpdir(), `${key.replace(/\W/g, "_")}${ext}`);
+
+  const writeStream = fs.createWriteStream(tempPath);
+  await new Promise<void>((resolve, reject) => {
+    stream
+      .pipe(writeStream)
+      .on("finish", () => resolve())
+      .on("error", reject);
+  });
+
+  return tempPath;
+}
+
 async function transcodeAndUpload({
   srcKey,
   dstKey,
@@ -201,174 +440,3 @@ async function transcodeAndUpload({
   });
 }
 
-/* ------------------ Playback + Preview ------------------ */
-export async function getPlayUrl(songId: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) redirect("/auth/sign-in");
-
-  const song = (await db.song.findFirst({
-    where: {
-      id: songId,
-      OR: [{ userId: session.user.id }, { published: true }],
-      s3Key: { not: null },
-    },
-    select: {
-      id: true,
-      s3Key: true,
-    },
-  })) ;
-
-  if (!song) throw new Error("Song not found or not accessible");
-
-  // bump listen count
-  await db.song.update({
-    where: { id: songId },
-    data: { listenCount: { increment: 1 } },
-  });
-
-  const userPackage = song.user?.package ?? "free";
-  const isOwner = session.user.id === song.user?.id;
-
-  if (userPackage === "free") {
-    const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
-    return transcodeAndUpload({
-      srcKey: song.s3Key,
-      dstKey: mp3Key,
-      args: ["-f", "mp3", "-b:a", "192k"],
-    });
-  }
-
-  if (userPackage === "starter") {
-    if (isOwner) {
-      // starter users get full WAV for own songs
-      return getPresignedUrl(song.s3Key);
-    } else {
-      // others' published songs → full MP3
-      const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
-      return transcodeAndUpload({
-        srcKey: song.s3Key,
-        dstKey: mp3Key,
-        args: ["-f", "mp3", "-b:a", "192k"],
-      });
-    }
-  }
-
-  if (userPackage === "creator") {
-    // creator users → always full WAV
-    return getPresignedUrl(song.s3Key);
-  }
-}
-
-export async function getDownloadUrl(songId: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) redirect("/auth/sign-in");
-
-  const song = await db.song.findFirst({
-    where: {
-      id: songId,
-      OR: [{ userId: session.user.id }, { published: true }],
-      s3Key: { not: null },
-    },
-    select: {
-      id: true,
-      s3Key: true,
-      userId: true,
-      published: true,
-    },
-  });
-
-  const user = await db.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select:
-    {
-      package:true
-    }
-  });
-
-  if (!song) throw new Error("Song not found or not accessible");
-
-  const isOwner = song.userId === session.user.id;
-  const userPackage = user?.package ?? "free";
-
-  console.log(user?.package, userPackage === "creator");
-
-  // Free package
-  if (userPackage === "free") {
-    if (isOwner) {
-      // full mp3 of their own
-      const mp3Key = song.s3Key?.replace(/\.wav$/, ".mp3");
-      return transcodeAndUpload({
-        srcKey: song.s3Key!,
-        dstKey: mp3Key!,
-        args: ["-f", "mp3", "-b:a", "192k"],
-      });
-    } else {
-      // 30s preview
-      const previewKey = song.s3Key?.replace(/\.wav$/, "-30s-preview.mp3");
-
-      const watermarkPath = path.join(process.cwd(), "public/watermark.wav");
-
-      return transcodeAndUpload({
-        srcKey: song.s3Key!,
-        dstKey: previewKey!,
-        args: [
-          "-t",
-          "30", // take first 30 seconds
-          "-i",
-          song.s3Key!, // original audio
-          "-i",
-          watermarkPath, // watermark audio
-          "-filter_complex",
-          "[0:a][1:a]concat=n=2:v=0:a=1[a]", // concatenate
-          "-map",
-          "[a]",
-          "-f",
-          "mp3",
-          "-b:a",
-          "128k",
-        ],
-      });
-    }
-  }
-
-  // Starter package
-  if (userPackage === "starter") {
-    if (isOwner) {
-      // own = wav
-      return getPresignedUrlForDownload(song.s3Key!);
-    } else {
-      // others published = mp3
-      const mp3Key = song.s3Key?.replace(/\.wav$/, ".mp3");
-      return transcodeAndUpload({
-        srcKey: song.s3Key!,
-        dstKey: mp3Key!,
-        args: ["-f", "mp3", "-b:a", "192k"],
-      });
-    }
-  }
-
-  // Creator package
-  if (userPackage === "creator") {
-    return getPresignedUrlForDownload(song.s3Key!);
-  }
-
-  throw new Error("Unsupported package type");
-}
-
-export async function getPresignedUrlForDownload(key: string): Promise<string> {
-  const command = new GetObjectCommand({
-    Bucket: env.S3_BUCKET_NAME,
-    Key: key,
-    ResponseContentDisposition: `attachment; filename="${key.split("/").pop()}"`,
-  });
-
-  return getSignedUrl(s3, command, { expiresIn: 3600 });
-}
