@@ -17,7 +17,7 @@ const redis = new Redis({
 
 const ratelimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(1, "1h"),
+  limiter: Ratelimit.slidingWindow(10, "1h"),
 });
 
 function jsonResponse(body: unknown, status: number) {
@@ -54,7 +54,10 @@ export const ipRateLimitPlugin = (): BetterAuthPlugin => ({
             const { success } = await ratelimit.limit(safeIp!);
 
             if (!success)
-              return jsonResponse({ error: "Too many signups from this IP" }, 429);
+              return jsonResponse(
+                { error: "Too many signups from this IP" },
+                429,
+              );
 
             // 2️⃣ Check if IP already exists in DB
             const existingUser = await db.user.findFirst({

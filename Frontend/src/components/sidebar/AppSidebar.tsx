@@ -6,11 +6,11 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { UserButton } from "@daveyplate/better-auth-ui";
 import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
 import SidebarMenuItems from "./sidebar-menu-items";
 import Upgrade from "./Upgrade";
+import type React from "react";
 
 const sidebarVariants: Variants = {
   hidden: { x: "-100%", opacity: 0 },
@@ -36,8 +36,13 @@ const itemVariants: Variants = {
   },
 };
 
-export function AppSidebar({ credits }: { credits: React.ReactNode }) {
-
+export function AppSidebar({
+  credits,
+  UserButton,
+}: {
+  credits: React.ReactNode;
+  UserButton: React.ReactNode;
+}) {
   return (
     <motion.div
       variants={sidebarVariants}
@@ -47,7 +52,7 @@ export function AppSidebar({ credits }: { credits: React.ReactNode }) {
     >
       <Sidebar>
         <SidebarHeader>
-          <motion.div className="mb-20 mt-15" variants={itemVariants}>
+          <motion.div className="mt-15 mb-20" variants={itemVariants}>
             <Image
               alt="Beatflow logo"
               src="/mainLogo.png"
@@ -72,9 +77,7 @@ export function AppSidebar({ credits }: { credits: React.ReactNode }) {
             {credits}
             <Upgrade />
           </motion.div>
-          <motion.div variants={itemVariants}>
-            <UserButton variant="outline" />
-          </motion.div>
+          <motion.div variants={itemVariants}>{UserButton}</motion.div>
         </SidebarFooter>
       </Sidebar>
     </motion.div>
