@@ -28,6 +28,8 @@ export const env = createEnv({
     PRODUCT_ID_MAX: z.string(),
     UPSTASH_REDIS_REST_URL: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
+    AUDIO_WORKER_API_KEY: z.string(),
+    NODE_BACKEND_URL: z.string(),
   },
 
   /**
@@ -69,6 +71,9 @@ export const env = createEnv({
 
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    AUDIO_WORKER_API_KEY: process.env.AUDIO_WORKER_API_KEY,
+    
+    NODE_BACKEND_URL: process.env.NODE_BACKEND_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

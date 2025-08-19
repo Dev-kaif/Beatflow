@@ -624,8 +624,8 @@ export default function LandingPage({
               Simple, Transparent Pricing
             </h2>
             <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg">
-              Start for free, and buy credits only when you need them. No
-              subscriptions, no hidden fees.
+              Start for free and pay only when you want more. No subscriptions,
+              no hidden fees—just music, your way.
             </p>
           </motion.div>
 
@@ -642,32 +642,42 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Free</CardTitle>
                   <CardDescription>
-                    Perfect for experimenting and personal projects.
+                    Experiment and enjoy public tracks.
                   </CardDescription>
                   <p className="pt-4 text-4xl font-bold">$0</p>
                 </CardHeader>
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />3 Credits / month
+                      <Check className="mr-2 text-green-500" />3 Credits per
+                      month to create your own tracks
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      Standard Quality (MP3)
+                      Listen to unlimited Public Music (MP3)
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="mr-2 text-green-500" />
+                      Download your own creations in full MP3
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="mr-2 text-green-500" />
+                      Preview Public Music downloads (30 sec, MP3 with
+                      Watermark)
                     </li>
                     <li className="flex items-center">
                       <X className="mr-2 text-red-500" />
-                      Includes Audio Watermark
+                      Download Public Music in High-Quality WAV
                     </li>
                   </ul>
                   <Button variant="outline" className="w-full">
-                    Start for Free
+                    Start Free & Create Now
                   </Button>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Creator Pack - Highlighted */}
+            {/* Creator Pack - Highlighted in middle */}
             <motion.div variants={fadeUp}>
               <Card className="relative flex h-full flex-col border-2 border-pink-500">
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-pink-500 text-white">
@@ -676,7 +686,8 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Creator Pack</CardTitle>
                   <CardDescription>
-                    The best value for building your unique sound library.
+                    Unlock full power to create, listen, and download without
+                    limits.
                   </CardDescription>
                   <p className="pt-4 text-4xl font-bold">$7</p>
                 </CardHeader>
@@ -684,19 +695,27 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      30 Credits
+                      30 Credits for unlimited creativity
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      High-Fidelity (WAV)
+                      Listen to all Public Music (MP3/WAV)
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      No Audio Watermark
+                      Create Your Own Music (30 Credits)
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="mr-2 text-green-500" />
+                      Download your creations in High-Quality WAV
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="mr-2 text-green-500" />
+                      No Watermarks on any downloads
                     </li>
                   </ul>
                   <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white">
-                    Unlock 30 Credits
+                    Unlock 30 Credits & Go Pro
                   </Button>
                 </CardContent>
               </Card>
@@ -708,7 +727,8 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Starter Pack</CardTitle>
                   <CardDescription>
-                    For when you need a few professional tracks, right now.
+                    Perfect for casual creators who want more downloads and
+                    freedom.
                   </CardDescription>
                   <p className="pt-4 text-4xl font-bold">$3</p>
                 </CardHeader>
@@ -716,19 +736,27 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      10 Credits
+                      10 Credits to create your own tracks
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      High-Fidelity (WAV)
+                      Listen to all Public Music (MP3)
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      No Audio Watermark
+                      Download your creations in High-Quality WAV
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="mr-2 text-green-500" />
+                      No Watermark-free downloads for Public Music
+                    </li>
+                    <li className="flex items-center">
+                      <X className="mr-2 text-red-500" />
+                      Download Public Music in High-Quality WAV
                     </li>
                   </ul>
                   <Button variant="outline" className="w-full">
-                    Get Starter Pack
+                    Get Starter Pack & Level Up
                   </Button>
                 </CardContent>
               </Card>

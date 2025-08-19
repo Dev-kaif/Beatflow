@@ -13,12 +13,6 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/env";
 import { headers } from "next/headers";
-import { PassThrough, Readable } from "stream";
-import { spawn } from "child_process";
-import { Upload } from "@aws-sdk/lib-storage";
-import path from "path";
-import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
-import fsPromises from "fs/promises";
 
 export interface GenerateRequest {
   prompt?: string;
@@ -82,60 +76,6 @@ export async function getPresignedUrl(key: string): Promise<string> {
   return getSignedUrl(s3, command, { expiresIn: 3600 });
 }
 
-export async function getObject(key: string): Promise<Readable> {
-  const command = new GetObjectCommand({
-    Bucket: env.S3_BUCKET_NAME,
-    Key: key,
-  });
-
-  const response = await s3.send(command);
-
-  if (!response.Body || !(response.Body instanceof Readable)) {
-    throw new Error("Failed to fetch object or not a Readable stream");
-  }
-
-  return response.Body;
-}
-
-export async function uploadTempObject(
-  key: string,
-  body: Readable,
-  contentType = "audio/mpeg",
-  expiresInDays = 7,
-): Promise<void> {
-  try {
-    const expireAt = new Date();
-    expireAt.setDate(expireAt.getDate() + expiresInDays);
-
-    const pass = new PassThrough();
-    body.pipe(pass);
-
-    const upload = new (Upload as new (options: unknown) => Upload)({
-      client: s3,
-      params: {
-        Bucket: env.S3_BUCKET_NAME,
-        Key: key,
-        Body: pass,
-        ContentType: contentType,
-        Metadata: {
-          expireat: expireAt.toISOString(),
-        },
-      },
-    });
-
-    await upload.done();
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("S3 upload failed:", error.message, error.stack);
-      throw error;
-    } else {
-      console.error("S3 upload failed with an unknown error object:", error);
-      throw new Error(
-        `An unknown error occurred during S3 upload: ${String(error)}`,
-      );
-    }
-  }
-}
 async function objectExists(key: string): Promise<boolean> {
   try {
     await s3.send(
@@ -147,77 +87,60 @@ async function objectExists(key: string): Promise<boolean> {
   }
 }
 
+// ------------------ NEW: Audio Worker Communication ------------------
+// This new helper function replaces all the local FFmpeg logic.
+// Define the shape of the error response from your worker
+interface WorkerErrorResponse {
+  details?: string;
+}
 
-/* ------------------ FFmpeg Helpers ------------------ */
-export async function transcodeWithWatermark({
-  srcKey, // S3 key of the song
-  watermarkPath, // local path to watermark
-  dstKey, // S3 destination key
-  duration = 30, // preview length in seconds
+async function processAudioOnWorker({
+  task,
+  songKey,
+  outputKey,
+  params,
 }: {
-  srcKey: string;
-  watermarkPath?: string;
-  dstKey: string;
-  duration?: number;
-}): Promise<string> {
-  if (!watermarkPath && (await objectExists(dstKey))) {
-    return getPresignedUrl(dstKey);
+  task: "CONVERT_TO_MP3" | "CREATE_PREVIEW";
+  songKey: string;
+  outputKey: string;
+  params?: Record<string, unknown>;
+}) {
+  if (await objectExists(outputKey)) {
+    return getPresignedUrl(outputKey);
   }
 
-  // Download song to local temp file
-  const localSongPath = await downloadToTemp(srcKey);
+  const workerUrl = `${env.NODE_BACKEND_URL}/process-audio`;
+  console.log(`Sending task "${task}" to audio worker for ${songKey}`);
 
-  // Temp output file
-  const tempOutputPath = path.join(
-    os.tmpdir(),
-    `${dstKey.replace(/\W/g, "_")}.mp3`,
-  );
-
-  // Build FFmpeg args
-  const args: string[] = ["-y"];
-  if (watermarkPath) {
-    args.push("-i", localSongPath, "-i", watermarkPath);
-    args.push(
-      "-filter_complex",
-      `[0:a]atrim=0:${duration},aresample=44100,asetpts=PTS-STARTPTS[a0];` +
-        `[1:a]aresample=44100,asetpts=PTS-STARTPTS[a1];` +
-        `[a0][a1]concat=n=2:v=0:a=1[a]`,
-      "-map",
-      "[a]",
-    );
-  } else {
-    args.push("-i", localSongPath);
-  }
-
-  args.push("-f", "mp3", "-b:a", "128k", tempOutputPath);
-
-  // Run FFmpeg
-  await new Promise<void>((resolve, reject) => {
-    const ffmpeg = spawn(ffmpegInstaller.path, args);
-    ffmpeg.on("error", reject);
-    ffmpeg.on("close", (code) => {
-      if (code !== 0)
-        return reject(new Error(`ffmpeg exited with code ${code}`));
-      resolve();
-    });
+  const response = await fetch(workerUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      "x-api-key": env.AUDIO_WORKER_API_KEY, // This is now fully typed!
+    },
+    body: JSON.stringify({
+      task,
+      songKey,
+      outputKey,
+      params,
+    }),
   });
 
-  // Upload result back to S3
-  await uploadTempObject(dstKey, fs.createReadStream(tempOutputPath));
+  if (!response.ok) {
+    // Assert the type of the JSON body
+    const errorBody = (await response.json()) as WorkerErrorResponse;
+    throw new Error(
+      `Audio worker failed: ${errorBody.details ?? response.statusText}`,
+    );
+  }
 
-  // Cleanup temp files
-  await fsPromises.unlink(localSongPath).catch(() => void 0); // ignore errors
-  await fsPromises.unlink(tempOutputPath).catch(() => void 0); // ignore errors
-
-  return getPresignedUrl(dstKey);
+  return getPresignedUrl(outputKey);
 }
 
 /* ------------------ Playback + Preview ------------------ */
 export async function getPlayUrl(songId: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/auth/sign-in");
 
   const song = await db.song.findFirst({
@@ -226,25 +149,16 @@ export async function getPlayUrl(songId: string) {
       OR: [{ userId: session.user.id }, { published: true }],
       s3Key: { not: null },
     },
-    select: {
-      id: true,
-      s3Key: true,
-      userId: true,
-    },
+    select: { id: true, s3Key: true, userId: true },
   });
 
   const user = await db.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      package: true,
-    },
+    where: { id: session.user.id },
+    select: { package: true },
   });
 
-  if (!song) throw new Error("Song not found or not accessible");
+  if (!song?.s3Key) throw new Error("Song not found or not accessible");
 
-  // bump listen count
   await db.song.update({
     where: { id: songId },
     data: { listenCount: { increment: 1 } },
@@ -253,43 +167,23 @@ export async function getPlayUrl(songId: string) {
   const userPackage = user?.package ?? "free";
   const isOwner = session.user.id === song.userId;
 
-  if (userPackage === "free") {
-    const mp3Key = song.s3Key!.replace(/\.wav$/, ".mp3");
-    return transcodeAndUpload({
-      srcKey: song.s3Key!,
-      dstKey: mp3Key,
-      args: ["-f", "mp3", "-b:a", "192k"],
+  if (userPackage === "creator" || (userPackage === "starter" && isOwner)) {
+    // These users get the full original WAV file
+    return getPresignedUrl(song.s3Key);
+  } else {
+    // All other users get an MP3. Let the worker handle the conversion.
+    const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
+    return processAudioOnWorker({
+      task: "CONVERT_TO_MP3",
+      songKey: song.s3Key,
+      outputKey: mp3Key,
+      params: { bitrate: "192k" },
     });
-  }
-
-  if (userPackage === "starter") {
-    if (isOwner) {
-      // starter users get full WAV for own songs
-      return getPresignedUrl(song.s3Key!);
-    } else {
-      // others' published songs → full MP3
-      const mp3Key = song.s3Key!.replace(/\.wav$/, "aaa.mp3");
-      return transcodeAndUpload({
-        srcKey: song.s3Key!,
-        dstKey: mp3Key,
-        args: ["-f", "mp3", "-b:a", "192k"],
-      });
-    }
-  }
-
-  if (userPackage === "creator") {
-    // creator users → always full WAV
-    return getPresignedUrl(song.s3Key!);
   }
 }
 
-import fs from "fs";
-
 export async function getDownloadUrl(songId: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/auth/sign-in");
 
   const song = await db.song.findFirst({
@@ -298,12 +192,7 @@ export async function getDownloadUrl(songId: string) {
       OR: [{ userId: session.user.id }, { published: true }],
       s3Key: { not: null },
     },
-    select: {
-      id: true,
-      s3Key: true,
-      userId: true,
-      published: true,
-    },
+    select: { id: true, s3Key: true, userId: true, published: true },
   });
 
   const user = await db.user.findUnique({
@@ -311,52 +200,50 @@ export async function getDownloadUrl(songId: string) {
     select: { package: true },
   });
 
-  if (!song) throw new Error("Song not found or not accessible");
+  if (!song?.s3Key) throw new Error("Song not found or not accessible");
 
   const isOwner = song.userId === session.user.id;
   const userPackage = user?.package ?? "free";
 
-  // Free package
-  if (userPackage === "free") {
-    if (isOwner) {
-      // full mp3 of their own
-      const mp3Key = song.s3Key!.replace(/\.wav$/, ".mp3");
-      return transcodeWithWatermark({
-        srcKey: song.s3Key!,
-        dstKey: mp3Key,
-      });
-    } else {
-      // 30s preview + watermark
-      const previewKey = song.s3Key!.replace(/\.wav$/, "-30s-preview.mp3");
-      const watermarkPath = path.join(process.cwd(), "public/watermark.mp3");
-
-      return transcodeWithWatermark({
-        srcKey: song.s3Key!,
-        watermarkPath,
-        dstKey: previewKey,
-        duration: 30,
-      });
-    }
+  // Creator users always get the original WAV
+  if (userPackage === "creator") {
+    return getPresignedUrlForDownload(song.s3Key);
   }
 
-  // Starter package
+  // Starter users get WAV for their own songs, MP3 for others
   if (userPackage === "starter") {
     if (isOwner) {
-      // own = wav
-      return getPresignedUrlForDownload(song.s3Key!);
+      return getPresignedUrlForDownload(song.s3Key);
     } else {
-      // others published = mp3
-      const mp3Key = song.s3Key!.replace(/\.wav$/, ".mp3");
-      return transcodeWithWatermark({
-        srcKey: song.s3Key!,
-        dstKey: mp3Key,
+      const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
+      return processAudioOnWorker({
+        task: "CONVERT_TO_MP3",
+        songKey: song.s3Key,
+        outputKey: mp3Key,
+        params: { bitrate: "192k" },
       });
     }
   }
 
-  // Creator package
-  if (userPackage === "creator") {
-    return getPresignedUrlForDownload(song.s3Key!);
+  // Free users get MP3 for their own, or a watermarked preview for others
+  if (userPackage === "free") {
+    if (isOwner) {
+      const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
+      return processAudioOnWorker({
+        task: "CONVERT_TO_MP3",
+        songKey: song.s3Key,
+        outputKey: mp3Key,
+        params: { bitrate: "192k" },
+      });
+    } else {
+      const previewKey = song.s3Key.replace(/\.wav$/, "-preview.mp3");
+      return processAudioOnWorker({
+        task: "CREATE_PREVIEW",
+        songKey: song.s3Key,
+        outputKey: previewKey,
+        params: { duration: 30, bitrate: "128k" },
+      });
+    }
   }
 
   throw new Error("Unsupported package type");
@@ -370,73 +257,4 @@ export async function getPresignedUrlForDownload(key: string): Promise<string> {
   });
 
   return getSignedUrl(s3, command, { expiresIn: 3600 });
-}
-
-import os from "os";
-
-async function downloadToTemp(key: string, ext = ".wav"): Promise<string> {
-  const stream: Readable = await getObject(key);
-  const tempPath = path.join(os.tmpdir(), `${key.replace(/\W/g, "_")}${ext}`);
-
-  const writeStream = fs.createWriteStream(tempPath);
-  await new Promise<void>((resolve, reject) => {
-    stream
-      .pipe(writeStream)
-      .on("finish", () => resolve())
-      .on("error", reject);
-  });
-
-  return tempPath;
-}
-
-async function transcodeAndUpload({
-  srcKey,
-  dstKey,
-  args,
-}: {
-  srcKey: string;
-  dstKey: string;
-  args: string[];
-}) {
-  if (await objectExists(dstKey)) {
-    return getPresignedUrl(dstKey);
-  }
-
-  const wavStream: Readable = await getObject(srcKey);
-
-  return new Promise<string>((resolve, reject) => {
-    const ffmpeg = spawn(ffmpegInstaller.path, [
-      "-y",
-      "-i",
-      "pipe:0",
-      ...args,
-      "pipe:1",
-    ]);
-    const pass = new PassThrough();
-
-    wavStream.pipe(ffmpeg.stdin);
-
-    ffmpeg.stdout.pipe(pass);
-
-    ffmpeg.stderr.on("data", (chunk) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      console.error("ffmpeg:", chunk.toString());
-    });
-
-    ffmpeg.on("error", (err) => {
-      reject(err);
-    });
-
-    ffmpeg.on("close", (code) => {
-      if (code !== 0) {
-        return reject(new Error(`ffmpeg exited with code ${code}`));
-      }
-    });
-
-    uploadTempObject(dstKey, pass)
-      .then(async () => {
-        resolve(await getPresignedUrl(dstKey));
-      })
-      .catch(reject);
-  });
 }
