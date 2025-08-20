@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { db } from "@/server/db";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
@@ -56,6 +57,8 @@ export const auth = betterAuth({
         google: {
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
+            accessType: "offline",
+            prompt: "select_account consent",
         },
         github: {
             clientId: env.GITHUB_CLIENT_ID,

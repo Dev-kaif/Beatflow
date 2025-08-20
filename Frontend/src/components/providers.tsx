@@ -2,6 +2,7 @@
 
 import { authClient } from "@/lib/auth-client";
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
+import { SocialProviderListEnum } from "better-auth/social-providers";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -18,6 +19,9 @@ export function Providers({ children }: { children: ReactNode }) {
         router.refresh();
       }}
       Link={Link}
+      social={{
+        providers: ["google", "github"],
+      }}
     >
       {children}
     </AuthUIProvider>

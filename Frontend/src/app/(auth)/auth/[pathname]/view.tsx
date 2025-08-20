@@ -38,7 +38,7 @@ export function AuthView({ pathname }: { pathname: string }) {
           </div>
         </motion.nav>
         <div className="mt-20 flex w-full items-center justify-center">
-          <AuthCard redirectTo="/home" pathname={pathname} />
+          <AuthCard socialLayout={"auto"} redirectTo="/home" pathname={pathname} />
         </div>
       </div>
     </main>
