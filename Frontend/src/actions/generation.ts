@@ -116,8 +116,7 @@ async function processAudioOnWorker({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // eslint-disable-next-line
-      "x-api-key": env.AUDIO_WORKER_API_KEY, 
+      "x-api-key": env.AUDIO_WORKER_API_KEY,
     },
     body: JSON.stringify({
       task,
