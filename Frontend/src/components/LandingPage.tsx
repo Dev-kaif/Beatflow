@@ -163,18 +163,18 @@ export default function LandingPage({
     }
   };
 
-    const handleUpgrade = async () => {
-      if(!isSessionActive){
-        redirect("/auth/sign-in");
-      }
+  const handleUpgrade = async () => {
+    if (!isSessionActive) {
+      redirect("/auth/sign-in");
+    }
 
-      await authClient.checkout({
-        products: [
-          process.env.NEXT_PUBLIC_PRODUCT_ID_MID!,
-          process.env.NEXT_PUBLIC_PRODUCT_ID_MAX!,
-        ],
-      });
-    };
+    await authClient.checkout({
+      products: [
+        process.env.NEXT_PUBLIC_PRODUCT_ID_MID!,
+        process.env.NEXT_PUBLIC_PRODUCT_ID_MAX!,
+      ],
+    });
+  };
 
   const navLinks = [
     { href: "features", label: "Features" },
@@ -685,7 +685,13 @@ export default function LandingPage({
                       Download Public Music in High-Quality WAV
                     </li>
                   </ul>
-                  <Button onClick={handleUpgrade} variant="outline" className="w-full">
+                  <Button
+                    onClick={() => {
+                      redirect("/auth/sign-in");
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
                     Start Free & Create Now
                   </Button>
                 </CardContent>
@@ -729,7 +735,10 @@ export default function LandingPage({
                       No Watermarks on any downloads
                     </li>
                   </ul>
-                  <Button onClick={handleUpgrade} className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white">
+                  <Button
+                    onClick={handleUpgrade}
+                    className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                  >
                     Unlock 30 Credits & Go Pro
                   </Button>
                 </CardContent>
@@ -770,7 +779,11 @@ export default function LandingPage({
                       Download Public Music in High-Quality WAV
                     </li>
                   </ul>
-                  <Button onClick={handleUpgrade} variant="outline" className="w-full">
+                  <Button
+                    onClick={handleUpgrade}
+                    variant="outline"
+                    className="w-full"
+                  >
                     Get Starter Pack & Level Up
                   </Button>
                 </CardContent>
@@ -797,6 +810,12 @@ export default function LandingPage({
             </p>
             <motion.div className="mt-10">
               <Button
+                onClick={() => {
+                  if (isSessionActive) {
+                    redirect("/home");
+                  }
+                  redirect("/auth/sign-in");
+                }}
                 size="lg"
                 className="animated-gradient bg-gradient-to-r from-orange-500 to-pink-500 px-8 py-7 text-lg text-white"
               >
