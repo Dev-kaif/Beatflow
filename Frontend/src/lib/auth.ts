@@ -25,13 +25,23 @@ export const auth = betterAuth({
         secure: false,
         sameSite: "lax",
     },
+    advanced: {
+        ipAddress: {
+            ipAddressHeaders: ["x-client-ip", "x-forwarded-for", "cf-connecting-ip"],
+            disableIpTracking: false,
+        },
+    },
     databaseHooks: {
         user: {
             create: {
                 after: async (user, context) => {
-                    type ContextWithMetadata = { metadata?: { ip?: string | null } };
-                    const ctx = context as ContextWithMetadata;
-                    const ip = ctx.metadata?.ip ?? "unknown";
+                    const ipFromAdvanced = (context as { ip?: string | null }).ip ?? null;
+
+                    const ipFromPlugin =
+                        (context as { metadata?: { ip?: string | null } }).metadata?.ip ??
+                        null;
+
+                    const ip = ipFromAdvanced ?? ipFromPlugin;
 
                     if (ip) {
                         await db.user.update({

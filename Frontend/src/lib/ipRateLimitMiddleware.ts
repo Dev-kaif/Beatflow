@@ -76,6 +76,7 @@ export const ipRateLimitPlugin = (): BetterAuthPlugin => ({
             return {
               context: {
                 ...ctx,
+                ip: safeIp,
                 metadata: { ...(ctx.metadata ?? {}), ip: safeIp },
               },
             };
