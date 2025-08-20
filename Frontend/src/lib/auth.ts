@@ -10,7 +10,7 @@ import { resendClient } from "./resend";
 
 const polarClient = new Polar({
     accessToken: process.env.POLAR_ACCESS_TOKEN,
-    server: "sandbox",
+    server: "production",
 });
 
 const productMid = env.PRODUCT_ID_MID;
