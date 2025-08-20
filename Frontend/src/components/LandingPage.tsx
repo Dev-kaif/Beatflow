@@ -36,6 +36,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
 
 // --- Professional Animation Variants ---
 const quintEaseOut: Easing = [0.22, 1, 0.36, 1];
@@ -160,6 +162,19 @@ export default function LandingPage({
       });
     }
   };
+
+    const handleUpgrade = async () => {
+      if(!isSessionActive){
+        redirect("/auth/sign-in");
+      }
+
+      await authClient.checkout({
+        products: [
+          process.env.NEXT_PUBLIC_PRODUCT_ID_MID!,
+          process.env.NEXT_PUBLIC_PRODUCT_ID_MAX!,
+        ],
+      });
+    };
 
   const navLinks = [
     { href: "features", label: "Features" },
@@ -670,7 +685,7 @@ export default function LandingPage({
                       Download Public Music in High-Quality WAV
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full">
+                  <Button onClick={handleUpgrade} variant="outline" className="w-full">
                     Start Free & Create Now
                   </Button>
                 </CardContent>
@@ -714,7 +729,7 @@ export default function LandingPage({
                       No Watermarks on any downloads
                     </li>
                   </ul>
-                  <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white">
+                  <Button onClick={handleUpgrade} className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white">
                     Unlock 30 Credits & Go Pro
                   </Button>
                 </CardContent>
@@ -755,7 +770,7 @@ export default function LandingPage({
                       Download Public Music in High-Quality WAV
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full">
+                  <Button onClick={handleUpgrade} variant="outline" className="w-full">
                     Get Starter Pack & Level Up
                   </Button>
                 </CardContent>
