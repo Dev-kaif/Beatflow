@@ -7,7 +7,7 @@ import {
   type Variants,
   AnimatePresence,
   type Easing,
-} from "framer-motion";
+} from "motion/react";
 import {
   Play,
   Pause,
@@ -23,6 +23,8 @@ import {
   X,
   ArrowRight,
   Check,
+  Wand2,
+  PenSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +41,10 @@ import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
 import type { Song } from "@prisma/client";
 import { getPlayUrlForLandingPage as getPlayUrl } from "@/actions/generation";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Switch } from "./ui/switch";
+import { Textarea } from "./ui/textarea";
 
 type SongWithUrl = Song & {
   thumbnailUrl: string | null;
@@ -157,6 +163,7 @@ export default function LandingPage({
   const [activeTab, setActiveTab] = useState<UseCaseKey>("content-creators");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [howItWorksTab, setHowItWorksTab] = useState("simple-mode");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -250,6 +257,7 @@ export default function LandingPage({
   const navLinks = [
     { href: "features", label: "Features" },
     { href: "use-cases", label: "Use Cases" },
+    { href: "how-it-works", label: "How it works" },
     { href: "pricing", label: "Pricing" },
   ];
 
@@ -785,6 +793,195 @@ export default function LandingPage({
               </AnimatePresence>
             </Tabs>
           </div>
+        </section>
+
+        {/* --- How It Works Section --- */}
+        <section
+          id="how-it-works"
+          className="px-4 py-24 sm:px-6 sm:py-32 lg:px-8"
+        >
+          <motion.div
+            className="mx-auto max-w-7xl"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            // ✅ This container will orchestrate the animations of its children
+            variants={staggerContainer}
+          >
+            {/* This motion.div is now a child and will use the stagger effect */}
+            <motion.div className="mb-20 text-center" variants={fadeUp}>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+                Create in 3 Simple Steps
+              </h2>
+              <p className="text-muted-foreground mx-auto mt-6 max-w-3xl text-lg">
+                Our intuitive creation panel makes it easy to bring your ideas
+                to life, whether you want a quick track or a fully customized
+                song.
+              </p>
+            </motion.div>
+
+            {/* This is the container for the Tabs component */}
+            <motion.div variants={fadeUp}>
+              <Tabs
+                defaultValue="simple-mode"
+                className="w-full"
+                onValueChange={setHowItWorksTab}
+              >
+                <TabsList className="relative mx-auto mb-12 grid h-auto w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="simple-mode" className="py-3 text-base">
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Simple Mode
+                  </TabsTrigger>
+                  <TabsTrigger value="custom-mode" className="py-3 text-base">
+                    <PenSquare className="mr-2 h-5 w-5" />
+                    Custom Mode
+                  </TabsTrigger>
+                </TabsList>
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={howItWorksTab}
+                    variants={fadeUp}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <TabsContent value="simple-mode" className="mt-0">
+                      <Card className="bg-card/50 mx-auto max-w-3xl">
+                        <CardHeader>
+                          <CardTitle>1. Describe Your Music</CardTitle>
+                          <CardDescription>
+                            Just type what you&apos;re imagining. The more
+                            descriptive, the better!
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6 p-6 pt-0">
+                          <div className="space-y-2">
+                            <Label htmlFor="simple-prompt">Your Prompt</Label>
+                            <Input
+                              id="simple-prompt"
+                              placeholder="Epic cinematic score for a space battle..."
+                              className="py-6 text-base"
+                              readOnly
+                            />
+                          </div>
+                          <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <Label htmlFor="instrumental-mode">
+                                Instrumental Only
+                              </Label>
+                              <p className="text-muted-foreground text-sm">
+                                No lyrics, just the music.
+                              </p>
+                            </div>
+                            <Switch
+                              id="instrumental-mode"
+                              defaultChecked={true}
+                              aria-readonly
+                            />
+                          </div>
+                          <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 py-6 text-lg text-white">
+                            <Wand2 className="mr-2 h-5 w-5" />
+                            Generate Your Track
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    <TabsContent value="custom-mode" className="mt-0">
+                      <Card className="bg-card/50 mx-auto max-w-4xl">
+                        <CardHeader>
+                          <CardTitle>Full Creative Control</CardTitle>
+                          <CardDescription>
+                            Write your own lyrics or have our AI write them for
+                            you, then define the perfect style.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-6 pt-0">
+                          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                            {/* Left Side: Lyrics */}
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold">
+                                1. Add Your Lyrics
+                              </h3>
+                              <Tabs
+                                defaultValue="auto-lyrics"
+                                className="w-full"
+                              >
+                                <TabsList className="grid w-full grid-cols-2">
+                                  <TabsTrigger value="auto-lyrics">
+                                    Auto
+                                  </TabsTrigger>
+                                  <TabsTrigger value="write-lyrics">
+                                    Write
+                                  </TabsTrigger>
+                                </TabsList>
+                                <TabsContent
+                                  value="auto-lyrics"
+                                  className="mt-4"
+                                >
+                                  <Label htmlFor="auto-lyrics-prompt">
+                                    Describe the song&apos;s story
+                                  </Label>
+                                  <Textarea
+                                    placeholder="A song about a lone traveler watching a sunrise..."
+                                    id="auto-lyrics-prompt"
+                                    className="mt-2"
+                                    readOnly
+                                  />
+                                </TabsContent>
+                                <TabsContent
+                                  value="write-lyrics"
+                                  className="mt-4"
+                                >
+                                  <Label htmlFor="write-lyrics-input">
+                                    Write your own lyrics
+                                  </Label>
+                                  <Textarea
+                                    placeholder={
+                                      "(Verse 1)\nIn the quiet of the dawn..."
+                                    }
+                                    id="write-lyrics-input"
+                                    className="mt-2"
+                                    readOnly
+                                  />
+                                </TabsContent>
+                              </Tabs>
+                            </div>
+                            {/* Right Side: Style & Generate */}
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold">
+                                2. Choose a Style
+                              </h3>
+                              <div className="space-y-2">
+                                <Label>
+                                  Select or describe the musical style
+                                </Label>
+                                <div className="flex flex-wrap gap-2">
+                                  <Badge variant="secondary">Lofi</Badge>
+                                  <Badge variant="secondary">Bass Heavy</Badge>
+                                  <Badge variant="secondary">Orchestral</Badge>
+                                  <Badge variant="secondary">8-bit</Badge>
+                                  <Badge variant="outline">Custom...</Badge>
+                                </div>
+                              </div>
+                              <div className="pt-8">
+                                <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 py-6 text-lg text-white">
+                                  <Wand2 className="mr-2 h-5 w-5" />
+                                  Generate Your Track
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </motion.div>
+                </AnimatePresence>
+              </Tabs>
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* --- Pricing Section --- */}

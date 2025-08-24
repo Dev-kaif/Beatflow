@@ -23,20 +23,34 @@ export default function SoundBar() {
   const [volume, setVolume] = useState([100]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isVolumeOpen, setIsVolumeOpen] = useState(false); // State to toggle volume slider
   const audioRef = useRef<HTMLAudioElement>(null);
+  const volumeRef = useRef<HTMLDivElement>(null); // Ref for the volume control container
+
+  // Effect to close volume slider on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        volumeRef.current &&
+        !volumeRef.current.contains(event.target as Node)
+      ) {
+        setIsVolumeOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const updateTime = () => setCurrentTime(audio.currentTime);
-
     const updateDuration = () => {
-      if (!isNaN(audio.duration)) {
-        setDuration(audio.duration);
-      }
+      if (!isNaN(audio.duration)) setDuration(audio.duration);
     };
-
     const handleTrackEnd = () => {
       setIsPlaying(false);
       setCurrentTime(0);
@@ -57,16 +71,12 @@ export default function SoundBar() {
     if (audioRef.current && track?.url) {
       setCurrentTime(0);
       setDuration(0);
-
       audioRef.current.src = track.url;
       audioRef.current.load();
-
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise
-          .then(() => {
-            setIsPlaying(true);
-          })
+          .then(() => setIsPlaying(true))
           .catch((error) => {
             console.error("Playback failed: ", error);
             setIsPlaying(false);
@@ -83,7 +93,6 @@ export default function SoundBar() {
 
   const togglePlay = async () => {
     if (!track?.url || !audioRef.current) return;
-
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
@@ -103,18 +112,18 @@ export default function SoundBar() {
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   if (!track) return null;
 
   const downloadSong = async (trackId: string) => {
     try {
-      setIsDownloading(true); 
-
+      setIsDownloading(true);
       const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
       if (!res.ok) throw new Error("Failed to download track");
-
       const blob = await res.blob();
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
@@ -124,7 +133,7 @@ export default function SoundBar() {
     } catch (error) {
       console.error("Download failed:", error);
     } finally {
-      setIsDownloading(false); 
+      setIsDownloading(false);
     }
   };
 
@@ -132,8 +141,9 @@ export default function SoundBar() {
     <div className="px-4 pb-2">
       <Card className="bg-background/60 relative w-full shrink-0 border-t py-0 backdrop-blur">
         <div className="space-y-2 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            {/* Left Section */}
+            <div className="flex min-w-0 items-center gap-2">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-purple-500 to-pink-500">
                 {track?.artwork ? (
                   <Image
@@ -148,7 +158,7 @@ export default function SoundBar() {
                   <Music className="h-4 w-4 text-white" />
                 )}
               </div>
-              <div className="flex max-w-96 flex-col space-y-1">
+              <div className="flex flex-col space-y-1 overflow-hidden">
                 <p
                   className="w-full truncate text-sm font-medium"
                   title={track.title!}
@@ -170,7 +180,7 @@ export default function SoundBar() {
             </div>
 
             {/* Centered controls */}
-            <div className="absolute left-1/2 -translate-x-1/2">
+            <div className="flex justify-center">
               <Button
                 className="cursor-pointer bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:text-white"
                 variant="ghost"
@@ -185,23 +195,35 @@ export default function SoundBar() {
               </Button>
             </div>
 
-            {/* Additional controls */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Volume2 className="h-4 w-4" />
-                <Slider
-                  value={volume}
-                  onValueChange={setVolume}
-                  step={1}
-                  max={100}
-                  min={0}
-                  className="w-16"
-                />
+            {/* Right Section */}
+            <div className="flex items-center justify-end gap-1 sm:gap-3">
+              {/* ---- MODIFIED VERTICAL VOLUME CONTROL START ---- */}
+              <div ref={volumeRef} className="relative flex items-center">
+                {isVolumeOpen && (
+                  <div className="bg-background/80 absolute bottom-full left-1/2 mb-4 -translate-x-1/2 rounded-lg p-2.5 shadow-lg backdrop-blur-md">
+                    <Slider
+                      value={volume}
+                      onValueChange={setVolume}
+                      orientation="vertical"
+                      className="h-24"
+                    />
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsVolumeOpen((prev) => !prev)}
+                >
+                  <Volume2 className="h-4 w-4" />
+                </Button>
               </div>
+              {/* ---- MODIFIED VERTICAL VOLUME CONTROL END ---- */}
+
               <Button
                 variant="ghost"
+                size="icon"
                 onClick={() => downloadSong(track.id)}
-                disabled={isDownloading} // optionally disable while downloading
+                disabled={isDownloading}
               >
                 {isDownloading ? (
                   <Loader2 className="h-4 w-4 animate-spin text-current" />
@@ -215,7 +237,7 @@ export default function SoundBar() {
                 size="icon"
                 onClick={() => setTrack(null)}
               >
-                <X />
+                <X className="h-5 w-5" />
               </Button>
             </div>
           </div>

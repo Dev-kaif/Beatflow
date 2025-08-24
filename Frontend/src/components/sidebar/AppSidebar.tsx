@@ -7,7 +7,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
-import { motion, type Variants } from "framer-motion";
+import { motion, type Variants } from "motion/react";
 import SidebarMenuItems from "./sidebar-menu-items";
 import Upgrade from "./Upgrade";
 import type React from "react";
@@ -35,6 +35,21 @@ const itemVariants: Variants = {
     transition: { duration: 0.4, ease: "easeOut" },
   },
 };
+
+// ---- NEW: Add this variant for the list itself ----
+const listVariants: Variants = {
+  hidden: {
+    opacity: 0,
+  },
+  visible: {
+    opacity: 1,
+    transition: {
+      // This tells the <ul> to stagger its own children (the <li> items)
+      staggerChildren: 0.05,
+    },
+  },
+};
+// ----------------------------------------------------
 
 export function AppSidebar({
   credits,
@@ -64,9 +79,11 @@ export function AppSidebar({
         </SidebarHeader>
 
         <SidebarContent>
-          <motion.ul className="space-y-2">
+          {/* ---- MODIFIED: Apply the new listVariants to the <ul> ---- */}
+          <motion.ul className="space-y-2" variants={listVariants}>
             <SidebarMenuItems />
           </motion.ul>
+          {/* ---------------------------------------------------------- */}
         </SidebarContent>
 
         <SidebarFooter>
