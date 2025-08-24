@@ -25,10 +25,6 @@ const s3 = new S3Client({
   },
 });
 
-// --- FFmpeg Configuration ---
-// REMOVED: Rely on a system-installed FFmpeg. 
-// fluent-ffmpeg finds it automatically if it's in the system's PATH.
-// ffmpeg.setFfmpegPath(ffmpegStatic!);
 
 // --- Main Processing Endpoint ---
 app.post("/process-audio", async (req, res) => {

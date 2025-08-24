@@ -181,6 +181,24 @@ export async function getPlayUrl(songId: string) {
   }
 }
 
+export async function getPlayUrlForLandingPage(songId: string) {
+  const song = await db.song.findFirst({
+    where: {
+      id: songId,
+      published: true,
+      s3Key: { not: null },
+    },
+    select: { id: true, s3Key: true },
+  });
+
+  if (!song?.s3Key) {
+    throw new Error("Song not found or not accessible");
+  }
+
+  // just return original S3 file url
+  return getPresignedUrl(song.s3Key);
+}
+
 export async function getDownloadUrl(songId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/auth/sign-in");

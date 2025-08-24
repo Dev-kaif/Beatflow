@@ -90,6 +90,7 @@ export default async function Page() {
 
   if (
     trendingSongs.length === 0 &&
+    popularSongs.length === 0 &&
     Object.keys(categorizedSongs).length === 0
   ) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type MouseEvent, useEffect } from "react";
+import { useState, type MouseEvent, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -11,7 +11,6 @@ import {
 import {
   Play,
   Pause,
-  Music,
   Sparkles,
   Zap,
   Shield,
@@ -38,6 +37,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
+import type { Song } from "@prisma/client";
+import { getPlayUrlForLandingPage as getPlayUrl } from "@/actions/generation";
+
+type SongWithUrl = Song & {
+  thumbnailUrl: string | null;
+  categories: {
+    name: string;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }[];
+};
+
+type SongsWithUrl = SongWithUrl[];
 
 // --- Professional Animation Variants ---
 const quintEaseOut: Easing = [0.22, 1, 0.36, 1];
@@ -85,6 +98,7 @@ const useCases = {
     title: "For Content Creators",
     description:
       "Elevate your videos, podcasts, and social media with unique background music that fits your brand perfectly.",
+    src: "/tab/youtuber.png",
     features: [
       "YouTube & Twitch Safe",
       "Custom Podcast Intros",
@@ -96,6 +110,7 @@ const useCases = {
     title: "For Filmmakers",
     description:
       "Compose the perfect mood with cinematic scores and ambient tracks for your films and documentaries.",
+    src: "/tab/filerMaker.png",
     features: [
       "Full Cinematic Scores",
       "Tension & Emotional Themes",
@@ -107,6 +122,7 @@ const useCases = {
     title: "For Game Developers",
     description:
       "Create immersive worlds with dynamic soundtracks and adaptive audio for your games.",
+    src: "/tab/gamedev.png",
     features: [
       "Adaptive Game Soundtracks",
       "Interactive Menu Music",
@@ -118,6 +134,7 @@ const useCases = {
     title: "For Podcasters",
     description:
       "Brand your show with professional intro music, transitions, and background beds that make you stand out.",
+    src: "/tab/podcaster.png",
     features: [
       "Signature Intro & Outro",
       "Custom Transition Sounds",
@@ -132,11 +149,12 @@ type UseCaseKey = keyof typeof useCases;
 // --- Main Page Component ---
 export default function LandingPage({
   isSessionActive,
+  songs,
 }: {
   isSessionActive: boolean;
+  songs: SongsWithUrl;
 }) {
   const [activeTab, setActiveTab] = useState<UseCaseKey>("content-creators");
-  const [isPlaying, setIsPlaying] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -176,6 +194,59 @@ export default function LandingPage({
     });
   };
 
+  const handleRedirect = () => {
+    if (!isSessionActive) {
+      redirect("/auth/sign-in");
+    }
+    redirect("/home");
+  };
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [activeSong, setActiveSong] = useState<string | null>(null); // current songId loaded in player
+  const [isPlaying, setIsPlaying] = useState<boolean | null>(false);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [loadedUrls, setLoadedUrls] = useState<Record<string, string>>({});
+
+  const handlePlay = async (songId: string) => {
+    try {
+      setIsLoading(songId);
+
+      let playUrl = loadedUrls[songId];
+      if (!playUrl) {
+        const fetchedUrl = await getPlayUrl(songId);
+        if (!fetchedUrl) throw new Error("Failed to get play URL");
+        playUrl = fetchedUrl;
+        setLoadedUrls((prev) => ({ ...prev, [songId]: fetchedUrl }));
+      }
+
+      if (audioRef.current) {
+        // If switching songs, set new src
+        if (activeSong !== songId) {
+          audioRef.current.src = playUrl;
+          audioRef.current.currentTime = 0;
+          setActiveSong(songId);
+        }
+
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (err) {
+      console.error("Play error:", err);
+      setIsPlaying(false);
+    } finally {
+      setIsLoading(null);
+    }
+  };
+
+  const handlePause = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
   const navLinks = [
     { href: "features", label: "Features" },
     { href: "use-cases", label: "Use Cases" },
@@ -197,6 +268,30 @@ export default function LandingPage({
           background-position: right center;
         }
       `}</style>
+
+      <audio
+        ref={audioRef}
+        onLoadedMetadata={() => {
+          if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+          }
+        }}
+        onTimeUpdate={() => {
+          if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+          }
+        }}
+        onEnded={() => {
+          setIsPlaying(null);
+          setCurrentTime(0);
+        }}
+        onError={() => {
+          console.error("Audio playback error");
+          setIsPlaying(null);
+          setIsLoading(null);
+        }}
+        preload="none"
+      />
 
       {/* --- Upgraded Navigation Bar --- */}
       <motion.nav
@@ -414,49 +509,110 @@ export default function LandingPage({
                 </motion.div>
               </motion.div>
             </motion.div>
+            {songs.map((song, index) => (
+              <motion.div
+                key={song.id}
+                className="mx-auto mt-20 max-w-5xl"
+                variants={scaleIn}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="bg-card/50 backdrop-blur-sm">
+                  <CardContent className="p-6 sm:p-8">
+                    <div className="mb-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
+                      {/* Left: Thumbnail + text */}
+                      <div className="flex items-center gap-4 text-left">
+                        {song.thumbnailUrl && (
+                          <Image
+                            unoptimized
+                            height={100}
+                            width={100}
+                            src={song.thumbnailUrl}
+                            alt={song.title ?? "Song thumbnail"}
+                            className="h-16 w-16 rounded-lg object-cover"
+                          />
+                        )}
+                        <div>
+                          <h3 className="text-lg font-semibold">
+                            {song.title}
+                          </h3>
 
-            <motion.div
-              className="mx-auto mt-20 max-w-5xl"
-              variants={scaleIn}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.5 }}
-            >
-              <Card className="bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6 sm:p-8">
-                  <div className="mb-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
-                    <div className="text-left">
-                      <h3 className="text-lg font-semibold">
-                        Example Generated Track
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        Prompt: &quot;Lofi hip hop beat, chill, good for
-                        studying&ldquo;
-                      </p>
+                          {/* Prompt */}
+                          {song.prompt && (
+                            <p className="text-muted-foreground text-sm">
+                              <span className="font-medium">Prompt:</span>{" "}
+                              {song.prompt}
+                            </p>
+                          )}
+
+                          {/* Described Lyrics / Full Described Song */}
+                          {(song.describedLyrics ?? song.fullDescribedSong) && (
+                            <p className="text-muted-foreground mt-1 text-sm">
+                              <span className="font-medium">
+                                Described Lyrics:
+                              </span>{" "}
+                              {song.describedLyrics ?? song.fullDescribedSong}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Play button */}
+                      <Button
+                        size="icon"
+                        onClick={() =>
+                          activeSong === song.id && isPlaying
+                            ? handlePause()
+                            : handlePlay(song.id)
+                        }
+                        className="h-14 w-14 flex-shrink-0"
+                        disabled={isLoading === song.id}
+                      >
+                        {isLoading === song.id ? (
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : activeSong === song.id && isPlaying ? (
+                          <Pause className="h-6 w-6" />
+                        ) : (
+                          <Play className="h-6 w-6" />
+                        )}
+                      </Button>
                     </div>
-                    <Button
-                      size="icon"
-                      onClick={() => setIsPlaying(!isPlaying)}
-                      className="h-14 w-14 flex-shrink-0"
-                    >
-                      {isPlaying ? (
-                        <Pause className="h-6 w-6" />
-                      ) : (
-                        <Play className="h-6 w-6" />
-                      )}
-                    </Button>
-                  </div>
-                  <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-                    <motion.div
-                      className="bg-primary h-2"
-                      initial={{ width: "0%" }}
-                      animate={{ width: isPlaying ? "100%" : "0%" }}
-                      transition={{ duration: 15, ease: "linear" }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+
+                    {/* Time Display */}
+                    {activeSong === song.id && (
+                      <>
+                        <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                          <div
+                            className="bg-primary h-2 transition-all duration-200"
+                            style={{
+                              width:
+                                duration > 0
+                                  ? `${(currentTime / duration) * 100}%`
+                                  : "0%",
+                            }}
+                          />
+                        </div>
+                        <div className="text-muted-foreground mt-2 flex justify-between text-xs">
+                          <span>
+                            {Math.floor(currentTime / 60)}:
+                            {String(Math.floor(currentTime % 60)).padStart(
+                              2,
+                              "0",
+                            )}
+                          </span>
+                          <span>
+                            {Math.floor(duration / 60)}:
+                            {String(Math.floor(duration % 60)).padStart(2, "0")}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </section>
 
@@ -610,11 +766,16 @@ export default function LandingPage({
                               ))}
                             </ul>
                           </div>
-                          <div className="from-primary/10 to-secondary flex aspect-square flex-col items-center justify-center rounded-lg bg-gradient-to-br p-8 text-center">
-                            <Music className="text-primary mx-auto mb-4 h-20 w-20" />
-                            <p className="text-lg font-semibold">
-                              Your Vision, Your Sound
-                            </p>
+                          <div className="from-primary/10 to-secondary flex aspect-square items-center justify-center rounded-lg bg-gradient-to-br p-8">
+                            <Image
+                              src={useCases[activeTab].src}
+                              alt="Use case illustration"
+                              className="h-full w-full object-contain"
+                              fill={false} // don’t use fill since you already give h/w
+                              width={300} // arbitrary fallback
+                              height={300}
+                              priority
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -686,9 +847,7 @@ export default function LandingPage({
                     </li>
                   </ul>
                   <Button
-                    onClick={() => {
-                      redirect("/auth/sign-in");
-                    }}
+                    onClick={handleRedirect}
                     variant="outline"
                     className="w-full"
                   >
@@ -810,12 +969,7 @@ export default function LandingPage({
             </p>
             <motion.div className="mt-10">
               <Button
-                onClick={() => {
-                  if (isSessionActive) {
-                    redirect("/home");
-                  }
-                  redirect("/auth/sign-in");
-                }}
+                onClick={handleRedirect}
                 size="lg"
                 className="animated-gradient bg-gradient-to-r from-orange-500 to-pink-500 px-8 py-7 text-lg text-white"
               >
@@ -880,7 +1034,7 @@ export default function LandingPage({
               <ul className="mt-4 space-y-3 text-sm">
                 <li>
                   <a
-                    href="#"
+                    href="/About"
                     className="text-muted-foreground hover:text-foreground"
                   >
                     About
