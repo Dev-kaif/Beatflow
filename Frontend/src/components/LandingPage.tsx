@@ -1066,7 +1066,7 @@ export default function LandingPage({
                     Unlock full power to create, listen, and download without
                     limits.
                   </CardDescription>
-                  <p className="pt-4 text-4xl font-bold">$7</p>
+                  <p className="pt-4 text-4xl font-bold">$5</p>
                 </CardHeader>
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
