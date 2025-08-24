@@ -179,13 +179,15 @@ export default function LandingPage({
   ) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
+    setTimeout(() => {
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 100);
   };
 
   const handleUpgrade = async () => {
@@ -311,7 +313,7 @@ export default function LandingPage({
           backdropFilter: isScrolled ? "blur(12px)" : "blur(0px)",
         }}
       >
-        <div className="mx-auto h-20 max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative z-50 mx-auto h-20 max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
             className="relative flex h-full items-center justify-between border-b transition-colors duration-300"
             style={{
@@ -381,50 +383,59 @@ export default function LandingPage({
 
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div
-              className="bg-card border-border border-t md:hidden"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <div className="space-y-4 px-4 py-6">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={`#${link.href}`}
-                    onClick={(e) => handleScrollTo(e, link.href)}
-                    className="text-muted-foreground block text-lg"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="border-border space-y-4 border-t pt-6">
-                  {isSessionActive ? (
-                    <Link href="/home" passHref>
-                      <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 py-6 text-lg text-white">
-                        Continue to Dashboard
-                      </Button>
+            <>
+              <motion.div
+                className="fixed inset-0 z-10 h-screen bg-black/20 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+
+              <motion.div
+                className="bg-card border-border relative z-50 border-t md:hidden"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <div className="space-y-4 px-4 py-6">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={`#${link.href}`}
+                      onClick={(e) => handleScrollTo(e, link.href)}
+                      className="text-muted-foreground block text-lg"
+                    >
+                      {link.label}
                     </Link>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <Link href="/auth/sign-in" passHref>
-                        <Button
-                          variant="outline"
-                          className="w-full py-6 text-lg"
-                        >
-                          Sign In
-                        </Button>
-                      </Link>
-                      <Link href="/auth/sign-up" passHref>
+                  ))}
+                  <div className="border-border space-y-4 border-t pt-6">
+                    {isSessionActive ? (
+                      <Link href="/home" passHref>
                         <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 py-6 text-lg text-white">
-                          Get Started Free
+                          Continue to Dashboard
                         </Button>
                       </Link>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <Link href="/auth/sign-in" passHref>
+                          <Button
+                            variant="outline"
+                            className="w-full py-6 text-lg"
+                          >
+                            Sign In
+                          </Button>
+                        </Link>
+                        <Link href="/auth/sign-up" passHref>
+                          <Button className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 py-6 text-lg text-white">
+                            Get Started Free
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </motion.nav>
@@ -716,7 +727,7 @@ export default function LandingPage({
                     key={key}
                     value={key}
                     className={
-                      "relative py-3 text-base data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none"
+                      "relative cursor-pointer py-3 text-base data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:shadow-none"
                     }
                   >
                     {activeTab === key && (
