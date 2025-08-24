@@ -45,6 +45,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Switch } from "./ui/switch";
 import { Textarea } from "./ui/textarea";
+import { SongCard } from "./landingSongCard";
 
 type SongWithUrl = Song & {
   thumbnailUrl: string | null;
@@ -164,6 +165,7 @@ export default function LandingPage({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [howItWorksTab, setHowItWorksTab] = useState("simple-mode");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -529,108 +531,18 @@ export default function LandingPage({
               </motion.div>
             </motion.div>
             {songs.map((song, index) => (
-              <motion.div
+              <SongCard
                 key={song.id}
-                className="mx-auto mt-20 max-w-5xl"
-                variants={scaleIn}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="bg-card/50 backdrop-blur-sm">
-                  <CardContent className="p-6 sm:p-8">
-                    <div className="mb-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
-                      {/* Left: Thumbnail + text */}
-                      <div className="flex items-center gap-4 text-left">
-                        {song.thumbnailUrl && (
-                          <Image
-                            unoptimized
-                            height={100}
-                            width={100}
-                            src={song.thumbnailUrl}
-                            alt={song.title ?? "Song thumbnail"}
-                            className="h-16 w-16 rounded-lg object-cover"
-                          />
-                        )}
-                        <div>
-                          <h3 className="text-lg font-semibold">
-                            {song.title}
-                          </h3>
-
-                          {/* Prompt */}
-                          {song.prompt && (
-                            <p className="text-muted-foreground text-sm">
-                              <span className="font-medium">Prompt:</span>{" "}
-                              {song.prompt}
-                            </p>
-                          )}
-
-                          {/* Described Lyrics / Full Described Song */}
-                          {(song.describedLyrics ?? song.fullDescribedSong) && (
-                            <p className="text-muted-foreground mt-1 text-sm">
-                              <span className="font-medium">
-                                Described Lyrics:
-                              </span>{" "}
-                              {song.describedLyrics ?? song.fullDescribedSong}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right: Play button */}
-                      <Button
-                        size="icon"
-                        onClick={() =>
-                          activeSong === song.id && isPlaying
-                            ? handlePause()
-                            : handlePlay(song.id)
-                        }
-                        className="h-14 w-14 flex-shrink-0"
-                        disabled={isLoading === song.id}
-                      >
-                        {isLoading === song.id ? (
-                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : activeSong === song.id && isPlaying ? (
-                          <Pause className="h-6 w-6" />
-                        ) : (
-                          <Play className="h-6 w-6" />
-                        )}
-                      </Button>
-                    </div>
-
-                    {/* Time Display */}
-                    {activeSong === song.id && (
-                      <>
-                        <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-                          <div
-                            className="bg-primary h-2 transition-all duration-200"
-                            style={{
-                              width:
-                                duration > 0
-                                  ? `${(currentTime / duration) * 100}%`
-                                  : "0%",
-                            }}
-                          />
-                        </div>
-                        <div className="text-muted-foreground mt-2 flex justify-between text-xs">
-                          <span>
-                            {Math.floor(currentTime / 60)}:
-                            {String(Math.floor(currentTime % 60)).padStart(
-                              2,
-                              "0",
-                            )}
-                          </span>
-                          <span>
-                            {Math.floor(duration / 60)}:
-                            {String(Math.floor(duration % 60)).padStart(2, "0")}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+                song={song}
+                index={index}
+                activeSong={activeSong}
+                isPlaying={isPlaying}
+                isLoading={isLoading}
+                duration={duration}
+                currentTime={currentTime}
+                handlePlay={handlePlay}
+                handlePause={handlePause}
+              />
             ))}
           </div>
         </section>
