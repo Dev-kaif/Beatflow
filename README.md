@@ -2,7 +2,11 @@
 
 An end-to-end application for AI-powered music creation. It combines a **Next.js frontend**, a **Python backend** (for generation), and a **Node.js backend** (for audio processing). Users can describe a mood, theme, or lyrics, and get back a full track with title, tags, and cover art.  
 
-👉 Live Demo: [https://www.beatflow.art](https://www.beatflow.art)
+👉 Live Demo: [https://www.beatflow.art](https://www.beatflow.art)  
+👉 YouTube Demo: [https://youtu.be/cRrX_xsLS1E](https://youtu.be/cRrX_xsLS1E)  
+
+[![YouTube Demo](https://img.youtube.com/vi/cRrX_xsLS1E/0.jpg)](https://youtu.be/cRrX_xsLS1E)
+
 
 ---
 

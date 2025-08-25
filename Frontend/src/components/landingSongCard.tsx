@@ -1,5 +1,3 @@
-// components/landing/SongCard.tsx
-
 import { useState } from "react";
 import { motion } from "motion/react";
 import Image from "next/image";

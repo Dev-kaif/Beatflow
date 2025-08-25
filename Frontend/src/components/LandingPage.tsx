@@ -519,14 +519,20 @@ export default function LandingPage({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full px-8 py-7 text-lg sm:w-auto"
+                  <a
+                  href="https://youtu.be/cRrX_xsLS1E"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   >
-                    <Play className="mr-2 h-5 w-5" />
-                    See How It Works
-                  </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full px-8 py-7 text-lg sm:w-auto"
+                    >
+                      <Play className="mr-2 h-5 w-5" />
+                      See How It Works
+                    </Button>
+                  </a>
                 </motion.div>
               </motion.div>
             </motion.div>
