@@ -50,6 +50,9 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [publishingTrackId, setPublishingTrackId] = useState<string | null>(
+    null,
+  );
   const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null);
   const [isplayTrackId, setIsplayTrackId] = useState<string | null>(null);
   const [trackToRename, setTrackToRename] = useState<Track | null>(null);
@@ -282,16 +285,24 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
                         <Button
                           onClick={async (e) => {
                             e.stopPropagation();
+                            setPublishingTrackId(track.id);
                             await setPublishedStatus(
                               track.id,
                               !track.published,
                             );
+                            setPublishingTrackId(null);
                           }}
                           variant="outline"
                           size="sm"
                           className={`cursor-pointer ${track.published ? "border-red-200" : ""}`}
                         >
-                          {track.published ? "Unpublish" : "Publish"}
+                          {publishingTrackId === track.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin text-gray-500" />
+                          ) : track.published ? (
+                            "Unpublish"
+                          ) : (
+                            "Publish"
+                          )}
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
