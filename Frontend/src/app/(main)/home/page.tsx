@@ -88,6 +88,16 @@ export default async function Page() {
       {} as Record<string, Array<(typeof songsWithUrl)[number]>>,
     );
 
+  /*
+  Result would be like this : 
+  categorizedSongs = 
+  {
+    "Hip-Hop": [ song1, song2, song3 ],
+    "Lofi": [ song4, song5 ],
+    "Rock": [ song6 ]
+  }
+ */
+
   if (
     trendingSongs.length === 0 &&
     popularSongs.length === 0 &&
@@ -134,6 +144,24 @@ export default async function Page() {
           </div>
         </div>
       )}
+
+      {/* Object entries function allows you to convert object into array 
+      
+      categorizedSongs = 
+      {
+        "Hip-Hop": [ song1, song2, song3 ],
+        "Lofi": [ song4, song5 ],
+        "Rock": [ song6 ]
+      }
+      
+      Object.entries(categorizedSongs) = 
+      [
+        [ "Hip-Hop", [ song1, song2, song3 ] ],
+        [ "Lofi", [ song4, song5 ] ],
+        [ "Rock", [ song6 ] ]
+      ]
+
+      */}
 
       {Object.entries(categorizedSongs)
         .slice(0, 5)
