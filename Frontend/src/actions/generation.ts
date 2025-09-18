@@ -163,22 +163,23 @@ export async function getPlayUrl(songId: string) {
     data: { listenCount: { increment: 1 } },
   });
 
-  const userPackage = user?.package ?? "free";
-  const isOwner = session.user.id === song.userId;
+  return getPresignedUrl(song.s3Key);
+  // const userPackage = user?.package ?? "free";
+  // const isOwner = session.user.id === song.userId;
 
-  if (userPackage === "creator" || (userPackage === "starter" && isOwner)) {
-    // These users get the full original WAV file
-    return getPresignedUrl(song.s3Key);
-  } else {
-    // All other users get an MP3. Let the worker handle the conversion.
-    const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
-    return processAudioOnWorker({
-      task: "CONVERT_TO_MP3",
-      songKey: song.s3Key,
-      outputKey: mp3Key,
-      params: { bitrate: "192k" },
-    });
-  }
+  // if (userPackage === "creator" || (userPackage === "starter" && isOwner)) {
+  //   return getPresignedUrl(song.s3Key);
+  //   // These users get the full original WAV file
+  // } else {
+  //   // All other users get an MP3. Let the worker handle the conversion.
+  //   const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
+  //   return processAudioOnWorker({
+  //     task: "CONVERT_TO_MP3",
+  //     songKey: song.s3Key,
+  //     outputKey: mp3Key,
+  //     params: { bitrate: "192k" },
+  //   });
+  // }
 }
 
 export async function getPlayUrlForLandingPage(songId: string) {
