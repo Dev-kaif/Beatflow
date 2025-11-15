@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/credit-ref?cron_secret=@CRON_SECRET",
-      "schedule": "34 18 * * *"
+      "schedule": "0 0 1 * *"
     }
   ]
 }
