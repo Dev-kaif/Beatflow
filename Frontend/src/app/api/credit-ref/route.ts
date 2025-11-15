@@ -1,17 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { sendCreditEmail } from "@/lib/email";
 import { db } from "@/server/db";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export async function POST(req: Request) {
   try {
-    // Optional: only allow POST
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method Not Allowed" });
-    }
-
     // Step 1: Add 5 credits to all users
     await db.user.updateMany({
       data: {
@@ -31,21 +22,17 @@ export default async function handler(
     // Step 3: Email all users
     // await Promise.all(users.map((user) => sendCreditEmail(user)));
     try {
-    await sendCreditEmail({
+      await sendCreditEmail({
         email: "mohammadkaifpro@gmail.com",
         name: "Kaif",
-    });
-
+      });
     } catch (err) {
-    console.error("Email send error:", err);
+      console.error("Email send error:", err);
     }
 
-
-    return res.status(200).json({ message: "Credits updated and emails sent" });
+    return new Response("Credits refreshed and emails sent", { status: 200 });
   } catch (err) {
     console.error("Credit refresh error:", err);
-    return res.status(500).json({
-      error: "Failed to refresh credits or send emails",
-    });
+    return new Response("Internal Server Error", { status: 500 });
   }
 }
