@@ -2,6 +2,14 @@ import { sendCreditEmail } from "@/lib/email";
 import { db } from "@/server/db";
 
 export async function POST(req: Request) {
+  
+  const { searchParams } = new URL(req.url);
+  const secret = searchParams.get("cron_secret");
+
+  if (!secret || secret !== process.env.CRON_SECRET) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   try {
     // Step 1: Add 5 credits to all users
     await db.user.updateMany({
