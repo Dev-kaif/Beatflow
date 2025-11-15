@@ -951,7 +951,7 @@ export default function LandingPage({
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />3 Credits per
+                      <Check className="mr-2 text-green-500" />5 Credits per
                       month to create your own tracks
                     </li>
                     <li className="flex items-center">
