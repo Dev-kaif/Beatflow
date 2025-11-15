@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     });
 
     // Batch size (3–10 recommended)
-    const batchSize = 5;
+    const batchSize = 2;
 
     for (let i = 0; i < users.length; i += batchSize) {
       const batch = users.slice(i, i + batchSize);
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       );
 
       // avoid hammering email provider
-      await new Promise((resolve) => setTimeout(resolve, 20000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     return new Response("Emails sent in batches", { status: 200 });

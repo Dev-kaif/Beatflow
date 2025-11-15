@@ -39,7 +39,7 @@ export const auth = betterAuth({
                         await db.user.update({
                             where: { id: user.id },
                             data: {
-                            credits: 5, // enforce correct default
+                                credits: 5,
                             },
                         });
                         const ipFromAdvanced = (context as { ip?: string | null }).ip ?? null;
