@@ -34,22 +34,29 @@ export const auth = betterAuth({
     databaseHooks: {
         user: {
             create: {
-                after: async (user, context) => {
-                    const ipFromAdvanced = (context as { ip?: string | null }).ip ?? null;
-
-                    const ipFromPlugin =
-                        (context as { metadata?: { ip?: string | null } }).metadata?.ip ??
-                        null;
-
-                    const ip = ipFromAdvanced ?? ipFromPlugin;
-
-                    if (ip) {
+                after:
+                    async (user, context) => {
                         await db.user.update({
                             where: { id: user.id },
-                            data: { ipAddress: ip },
+                            data: {
+                            credits: 5, // enforce correct default
+                            },
                         });
-                    }
-                },
+                        const ipFromAdvanced = (context as { ip?: string | null }).ip ?? null;
+
+                        const ipFromPlugin =
+                            (context as { metadata?: { ip?: string | null } }).metadata?.ip ??
+                            null;
+
+                        const ip = ipFromAdvanced ?? ipFromPlugin;
+
+                        if (ip) {
+                            await db.user.update({
+                                where: { id: user.id },
+                                data: { ipAddress: ip },
+                            });
+                        }
+                    },
             },
         },
     },
