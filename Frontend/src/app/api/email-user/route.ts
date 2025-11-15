@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       );
 
       // avoid hammering email provider
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
     }
 
     return new Response("Emails sent in batches", { status: 200 });
