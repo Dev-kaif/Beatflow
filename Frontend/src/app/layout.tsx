@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Beatflow",
@@ -25,6 +26,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster />
+          <Analytics />
         </Providers>
       </body>
     </html>
