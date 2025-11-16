@@ -25,6 +25,7 @@ import {
   Check,
   Wand2,
   PenSquare,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -520,9 +521,9 @@ export default function LandingPage({
                   whileTap={{ scale: 0.95 }}
                 >
                   <a
-                  href="https://youtu.be/cRrX_xsLS1E"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                    href="https://youtu.be/cRrX_xsLS1E"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <Button
                       size="lg"
@@ -571,8 +572,9 @@ export default function LandingPage({
                 handles the complexity, so you can focus on your vision.
               </p>
             </motion.div>
+
             <motion.div
-              className="grid gap-12 md:grid-cols-3"
+              className="grid gap-12 md:grid-cols-4"
               variants={staggerContainer}
               initial="hidden"
               whileInView="visible"
@@ -596,6 +598,12 @@ export default function LandingPage({
                   title: "Infinite Styles",
                   description:
                     "Explore any genre imaginable, from cinematic orchestral scores to energetic electronic beats, all from a single prompt.",
+                },
+                {
+                  icon: Globe, 
+                  title: "Multi-Lingual Support",
+                  description:
+                    "Create music in any language. Write prompts in English, Spanish, Japanese, French, Korean and more. Your creativity has no borders.",
                 },
               ].map((feature) => (
                 <motion.div key={feature.title} variants={fadeUp}>
