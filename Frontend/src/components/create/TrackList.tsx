@@ -106,7 +106,7 @@ export function TrackList({ tracks }: { tracks: Track[] }) {
     try {
       setIsDownloading(true); // start loader
 
-      const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
+      const res = await fetch(`/api/download/${trackId}`);
       if (!res.ok) throw new Error("Failed to download track");
 
       const blob = await res.blob();

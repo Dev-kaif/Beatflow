@@ -1,9 +1,8 @@
 // src/app/api/download/[trackId]/route.ts
 import { getDownloadUrl } from "@/actions/generation";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const trackId = searchParams.get("trackId");
+export async function GET(req: Request , { params }: { params:  Promise<{ trackId: string }>}) {
+  const trackId = (await params).trackId;
   if (!trackId) return new Response("Missing trackId", { status: 400 });
 
   try {

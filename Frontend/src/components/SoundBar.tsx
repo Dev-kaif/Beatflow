@@ -122,7 +122,7 @@ export default function SoundBar() {
   const downloadSong = async (trackId: string) => {
     try {
       setIsDownloading(true);
-      const res = await fetch(`/api/download/${trackId}?trackId=${trackId}`);
+      const res = await fetch(`/api/download/${trackId}`);
       if (!res.ok) throw new Error("Failed to download track");
       const blob = await res.blob();
       const link = document.createElement("a");
