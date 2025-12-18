@@ -1009,7 +1009,7 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Creator Pack</CardTitle>
                   <CardDescription>
-                    Full power unlocked — early-access launch offer 🚀
+                    For creators who want more freedom without going all-in.
                   </CardDescription>
 
                   <div className="pt-4 flex items-end gap-2">
@@ -1059,7 +1059,7 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Starter Pack</CardTitle>
                   <CardDescription>
-                    Casual creators — perfect to get started 🎵
+                    Maximum value for a minimal price
                   </CardDescription>
 
                   <div className="pt-4 flex items-end gap-2">
