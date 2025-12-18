@@ -93,7 +93,10 @@ export function AppSidebar({
             </p>
 
             <p className="mt-1 text-xs text-neutral-600">
-              Choose a pack and keep creating
+              Choose a pack and{" "}
+              <span className="font-medium text-orange-600">
+                keep creating
+              </span>
             </p>
 
             <div className="mt-3 space-y-2">
@@ -111,9 +114,15 @@ export function AppSidebar({
                 <span className="font-semibold text-neutral-900">$3</span>
               </div>
             </div>
-            <p className="mt-3 text-xs text-neutral-500">
-              Click <span className="font-medium text-neutral-700">Upgrade</span> below to purchase
+            <p className="mt-3 flex items-center gap-1 text-xs text-neutral-500">
+              Use{" "}
+              <span className="font-medium text-orange-600">
+                Upgrade
+              </span>{" "}
+              below
+              <span className="text-orange-500">↓</span>
             </p>
+
           </motion.div>
 
           <motion.div
