@@ -934,8 +934,8 @@ export default function LandingPage({
               Simple, Transparent Pricing
             </h2>
             <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg">
-              Start for free and pay only when you want more. No subscriptions,
-              no hidden fees—just music, your way.
+              Start for free and pay only when you want more. No subscriptions, no hidden
+              fees — just music, your way.
             </p>
           </motion.div>
 
@@ -952,15 +952,16 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Free</CardTitle>
                   <CardDescription>
-                    Experiment and enjoy public tracks.
+                    Try Beatflow and explore public music.
                   </CardDescription>
                   <p className="pt-4 text-4xl font-bold">$0</p>
                 </CardHeader>
+
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />5 Credits per
-                      month to create your own tracks
+                      <Check className="mr-2 text-green-500" />
+                      1 Free Credit (one-time)
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -968,56 +969,53 @@ export default function LandingPage({
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      Download your own creations in full MP3
+                      Download your own creation in MP3
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      Preview Public Music downloads (30 sec, MP3 with
-                      Watermark)
+                      Preview Public Music (30 sec, watermarked)
                     </li>
                     <li className="flex items-center">
                       <X className="mr-2 text-red-500" />
-                      Download Public Music in High-Quality WAV
+                      High-quality WAV downloads
                     </li>
                   </ul>
-                  <Button
-                    onClick={handleRedirect}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Start Free & Create Now
+
+                  <Button onClick={handleRedirect} variant="outline" className="w-full">
+                    Start Free
                   </Button>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Creator Pack - Highlighted in middle */}
+            {/* Creator Pack */}
             <motion.div variants={fadeUp}>
               <Card className="relative flex h-full flex-col border-2 border-pink-500">
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-pink-500 text-white">
                   Most Popular
                 </Badge>
+
                 <CardHeader>
                   <CardTitle>Creator Pack</CardTitle>
                   <CardDescription>
-                    Unlock full power to create, listen, and download without
-                    limits.
+                    Full power unlocked — early-access launch offer 🚀
                   </CardDescription>
-                  <p className="pt-4 text-4xl font-bold">$5</p>
+
+                  <div className="pt-4 flex items-end gap-2">
+                    <span className="text-lg line-through text-muted-foreground">$5</span>
+                    <span className="text-4xl font-bold">$3</span>
+                  </div>
                 </CardHeader>
+
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      30 Credits for unlimited creativity
+                      30 Music Generation Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      Listen to all Public Music (MP3/WAV)
-                    </li>
-                    <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />
-                      Create Your Own Music (30 Credits)
+                      Listen to all Public Music (MP3 & WAV)
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -1025,15 +1023,21 @@ export default function LandingPage({
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      No Watermarks on any downloads
+                      No watermarks on any downloads
                     </li>
                   </ul>
-                  <Button
-                    onClick={handleUpgrade}
-                    className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white"
-                  >
-                    Unlock 30 Credits & Go Pro
-                  </Button>
+
+                  <div>
+                    <Button
+                      onClick={handleUpgrade}
+                      className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                    >
+                      Unlock 30 Credits for $3
+                    </Button>
+                    <p className="mt-3 text-center text-xs text-muted-foreground">
+                      ⏳ Limited-time launch pricing
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -1044,16 +1048,20 @@ export default function LandingPage({
                 <CardHeader>
                   <CardTitle>Starter Pack</CardTitle>
                   <CardDescription>
-                    Perfect for casual creators who want more downloads and
-                    freedom.
+                    Casual creators — perfect to get started 🎵
                   </CardDescription>
-                  <p className="pt-4 text-4xl font-bold">$3</p>
+
+                  <div className="pt-4 flex items-end gap-2">
+                    <span className="text-lg line-through text-muted-foreground">$3</span>
+                    <span className="text-4xl font-bold">$1</span>
+                  </div>
                 </CardHeader>
+
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      10 Credits to create your own tracks
+                      10 Music Generation Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -1064,26 +1072,25 @@ export default function LandingPage({
                       Download your creations in High-Quality WAV
                     </li>
                     <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />
-                      No Watermark-free downloads for Public Music
-                    </li>
-                    <li className="flex items-center">
                       <X className="mr-2 text-red-500" />
-                      Download Public Music in High-Quality WAV
+                      Public WAV downloads
                     </li>
                   </ul>
-                  <Button
-                    onClick={handleUpgrade}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Get Starter Pack & Level Up
-                  </Button>
+
+                  <div>
+                    <Button onClick={handleUpgrade} variant="outline" className="w-full">
+                      Get Starter Pack for $1
+                    </Button>
+                    <p className="mt-3 text-center text-xs text-muted-foreground">
+                      Early supporter discount
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
           </motion.div>
         </section>
+
 
         {/* --- Final CTA Section --- */}
         <section className="py-24 sm:py-32">
