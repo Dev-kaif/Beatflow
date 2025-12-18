@@ -193,15 +193,26 @@ export default function LandingPage({
     }, 100);
   };
 
-  const handleUpgrade = async () => {
+  const handleUpgradeToMid = async () => {
     if (!isSessionActive) {
       redirect("/auth/sign-in");
     }
 
     await authClient.checkout({
       products: [
-        process.env.NEXT_PUBLIC_PRODUCT_ID_MID!,
-        process.env.NEXT_PUBLIC_PRODUCT_ID_MAX!,
+        process.env.NEXT_PUBLIC_PRODUCT_ID_MID!
+      ],
+    });
+  };
+
+  const handleUpgradeToMax = async () => {
+    if (!isSessionActive) {
+      redirect("/auth/sign-in");
+    }
+
+    await authClient.checkout({
+      products: [
+       process.env.NEXT_PUBLIC_PRODUCT_ID_MAX!
       ],
     });
   };
@@ -1029,7 +1040,7 @@ export default function LandingPage({
 
                   <div>
                     <Button
-                      onClick={handleUpgrade}
+                      onClick={handleUpgradeToMax}
                       className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white"
                     >
                       Unlock 30 Credits for $3
@@ -1078,7 +1089,7 @@ export default function LandingPage({
                   </ul>
 
                   <div>
-                    <Button onClick={handleUpgrade} variant="outline" className="w-full">
+                    <Button onClick={handleUpgradeToMid} variant="outline" className="w-full">
                       Get Starter Pack for $1
                     </Button>
                     <p className="mt-3 text-center text-xs text-muted-foreground">
