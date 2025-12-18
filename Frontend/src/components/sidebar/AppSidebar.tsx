@@ -86,7 +86,7 @@ export function AppSidebar({
         <SidebarFooter>
           <motion.div
             variants={itemVariants}
-            className="mb-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-xs"
+            className="mb-3 p-4 text-xs rounded-xl border border-pink-200 bg-gradient-to-r from-orange-50 to-pink-50 "
           >
             <p className="text-sm font-semibold text-neutral-900">
               ✨ Get more credits
@@ -108,7 +108,7 @@ export function AppSidebar({
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div
             variants={itemVariants}
             className="mb-3 flex w-full items-center gap-1 text-xs"
