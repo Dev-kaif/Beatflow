@@ -255,6 +255,7 @@ export function SongPanel() {
           </TabsContent>
         </Tabs>
       </div>
+      
 
       <div className="border-t p-4">
         <Button
