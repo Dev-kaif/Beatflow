@@ -86,39 +86,36 @@ export function AppSidebar({
         <SidebarFooter>
           <motion.div
             variants={itemVariants}
+            className="mb-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-xs"
+          >
+            <p className="text-sm font-semibold text-neutral-900">
+              ✨ Get more credits
+            </p>
+
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between rounded-md bg-white px-3 py-2">
+                <span className="text-neutral-600">
+                  Starter · 10 credits
+                </span>
+                <span className="font-semibold text-neutral-900">$1</span>
+              </div>
+
+              <div className="flex items-center justify-between rounded-md bg-white px-3 py-2">
+                <span className="text-neutral-600">
+                  Creator · 30 credits
+                </span>
+                <span className="font-semibold text-neutral-900">$3</span>
+              </div>
+            </div>
+          </motion.div>
+          
+          <motion.div
+            variants={itemVariants}
             className="mb-3 flex w-full items-center gap-1 text-xs"
           >
             {credits}
             <Upgrade />
           </motion.div>
-
-          {showSaleBanner && (
-            <motion.div
-              variants={itemVariants}
-              className="mb-3 rounded-xl border border-pink-200 bg-gradient-to-r from-orange-50 to-pink-50 p-3 text-xs shadow-sm"
-            >
-              <p className="font-semibold text-pink-700">
-                🎉 Early Creator Sale
-              </p>
-
-              <p className="mt-1 text-muted-foreground leading-snug">
-                Create more tracks — Starter{" "}
-                <span className="font-semibold">$1</span> · Creator{" "}
-                <span className="font-semibold">$3</span>
-              </p>
-
-              <button
-                onClick={() => {
-                  // reuse your existing upgrade flow
-                  const event = new CustomEvent("open-upgrade");
-                  window.dispatchEvent(event);
-                }}
-                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-pink-600 hover:underline"
-              >
-                Unlock credits →
-              </button>
-            </motion.div>
-          )}
 
           <motion.div variants={itemVariants}>{UserButton}</motion.div>
         </SidebarFooter>
@@ -126,3 +123,5 @@ export function AppSidebar({
     </motion.div>
   );
 }
+
+
