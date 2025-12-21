@@ -5,7 +5,6 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { polar, checkout, webhooks, portal } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
 import { env } from "@/env";
-import { ipRateLimitPlugin } from "./ipRateLimitMiddleware";
 import { resendClient } from "./resend";
 
 const polarClient = new Polar({
@@ -147,7 +146,6 @@ export const auth = betterAuth({
         },
     },
     plugins: [
-        ipRateLimitPlugin(),
         polar({
             client: polarClient,
             createCustomerOnSignUp: true,
