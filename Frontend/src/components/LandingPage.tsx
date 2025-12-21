@@ -972,7 +972,7 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      1 Free Credit (one-time)
+                      No Free Credit (one-time)
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
