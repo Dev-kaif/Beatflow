@@ -13,14 +13,24 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import "@/styles/globals.css";
+import { Info } from "lucide-react";
 
-export default function RootLayout({
+export default function Layout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <SidebarProvider>
       <AppSidebarWrapper />
       <SidebarInset className="relative flex h-screen flex-col">
+        {/* banner */}
+        <div className="bg-muted/50 border-b px-4 py-2 flex items-center gap-2 text-sm text-muted-foreground">
+          <Info className="h-4 w-4 text-primary shrink-0" />
+          <span>
+            Free credits are paused due to high infrastructure costs & traffic. 
+            <strong> Support the project to keep it running.</strong>
+          </span>
+        </div>
+
         <header className="bg-background sticky top-0 z-50 border-b px-4 py-2">
           <div className="flex shrink-0 grow items-center gap-2">
             <SidebarTrigger className="-ml-1" />

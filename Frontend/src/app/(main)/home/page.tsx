@@ -88,15 +88,6 @@ export default async function Page() {
       {} as Record<string, Array<(typeof songsWithUrl)[number]>>,
     );
 
-  /*
-  Result would be like this : 
-  categorizedSongs = 
-  {
-    "Hip-Hop": [ song1, song2, song3 ],
-    "Lofi": [ song4, song5 ],
-    "Rock": [ song6 ]
-  }
- */
 
   if (
     trendingSongs.length === 0 &&
