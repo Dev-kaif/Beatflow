@@ -26,7 +26,7 @@ export default function Layout({
         <div className="bg-gradient-to-r from-orange-50 to-pink-50 border-b px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground text-center">
           <Info className="h-4 w-4 text-primary shrink-0" />
           <span>
-            Free credits are paused due to high infrastructure costs & traffic. 
+            Only 1 free credit is being given due to high infrastructure costs & traffic. 
             <strong> Support the project to keep it running.</strong>
           </span>
         </div>
