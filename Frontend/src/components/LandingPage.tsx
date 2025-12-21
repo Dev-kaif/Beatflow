@@ -1013,8 +1013,8 @@ export default function LandingPage({
                   </CardDescription>
 
                   <div className="pt-4 flex items-end gap-2">
-                    <span className="text-lg line-through text-muted-foreground">$5</span>
-                    <span className="text-4xl font-bold">$3</span>
+                    <span className="text-lg line-through text-muted-foreground">$7</span>
+                    <span className="text-4xl font-bold">$5</span>
                   </div>
                 </CardHeader>
 
@@ -1064,7 +1064,7 @@ export default function LandingPage({
 
                   <div className="pt-4 flex items-end gap-2">
                     <span className="text-lg line-through text-muted-foreground">$3</span>
-                    <span className="text-4xl font-bold">$1</span>
+                    <span className="text-4xl font-bold">$2</span>
                   </div>
                 </CardHeader>
 
