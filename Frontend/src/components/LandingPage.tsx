@@ -971,8 +971,8 @@ export default function LandingPage({
                 <CardContent className="flex flex-grow flex-col justify-between">
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
-                      <Check className="mr-2 text-green-500" />
-                      No Free Credit (one-time)
+                      <X className="mr-2 text-red-500" />
+                      No Free Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -1043,7 +1043,7 @@ export default function LandingPage({
                       onClick={handleUpgradeToMax}
                       className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white"
                     >
-                      Unlock 30 Credits for $3
+                      Unlock 30 Credits for $5
                     </Button>
                     <p className="mt-3 text-center text-xs text-muted-foreground">
                       ⏳ Limited-time launch pricing
@@ -1090,7 +1090,7 @@ export default function LandingPage({
 
                   <div>
                     <Button onClick={handleUpgradeToMid} variant="outline" className="w-full">
-                      Get Starter Pack for $1
+                      Get Starter Pack for $2
                     </Button>
                     <p className="mt-3 text-center text-xs text-muted-foreground">
                       Early supporter discount
