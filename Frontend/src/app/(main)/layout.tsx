@@ -23,7 +23,7 @@ export default function Layout({
       <AppSidebarWrapper />
       <SidebarInset className="relative flex h-screen flex-col">
         {/* banner */}
-        <div className="bg-muted/50 border-b px-4 py-2 flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="bg-gradient-to-r from-orange-50 to-pink-50 border-b px-4 py-2 flex items-center justify-center gap-2 text-sm text-muted-foreground text-center">
           <Info className="h-4 w-4 text-primary shrink-0" />
           <span>
             Free credits are paused due to high infrastructure costs & traffic. 
