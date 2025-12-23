@@ -35,6 +35,7 @@ STYLE RULES:
 - Match the mood, genre, and perspective from the description
 - Avoid clichés and overused metaphors
 - Do not mention music genres or instruments directly unless implied
+- If the user’s description is gibberish (e.g., “skfjnsdjfnsdjn”), do not attempt to correct it. Instead, generate a cool song using a similar rhythmic gibberish pattern, weaving in real words to give it meaning.
 
 ---
 REFERENCE FORMATTING (DO NOT COPY CONTENT)

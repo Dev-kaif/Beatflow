@@ -1,5 +1,3 @@
-import gc
-import torch
 import base64
 from typing import List
 import uuid
@@ -8,7 +6,6 @@ import os
 import requests
 import boto3
 from botocore.client import Config
-
 
 from pydantic import BaseModel
 
@@ -32,13 +29,12 @@ image = (
             "cd /temp/ACE-step && pip install .",
         ]
     )
-    .env({
-        "HF_HOME": "/.cache/huggingface",
-        })
+    .env({"HF_HOME": "/.cache/huggingface"})
     .add_local_python_source("prompts")
 )
 
-model_volume = modal.Volume.from_name("ace-step-models", create_if_missing=True)
+model_volume = modal.Volume.from_name(
+    "ace-step-models", create_if_missing=True)
 hf_volume = modal.Volume.from_name("qwen-hf-cache", create_if_missing=True)
 music_gen_secrets = modal.Secret.from_name("music-genrator")
 
@@ -93,11 +89,11 @@ class MusicGenServer:
             sf.write(path, waveform.cpu().numpy().T, sample_rate)
 
         torchaudio.save = safe_save
-    
+
         from acestep.pipeline_ace_step import ACEStepPipeline
         from transformers import AutoTokenizer, AutoModelForCausalLM
-        # from diffusers import AutoPipelineForText2Image
-        # import torch
+        from diffusers import AutoPipelineForText2Image
+        import torch
 
         # Music Genration model
         self.music_model = ACEStepPipeline(
@@ -120,11 +116,11 @@ class MusicGenServer:
         )
 
         # Stable defusion model
-        # self.image_pipe = AutoPipelineForText2Image.from_pretrained(
-        #     "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
-        # )
+        self.image_pipe = AutoPipelineForText2Image.from_pretrained(
+            "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
+        )
 
-        # self.image_pipe.to("cuda")
+        self.image_pipe.to("cuda")
 
     def qwen_prompt(self, question: str):
         messages = [{"role": "user", "content": question}]
@@ -137,15 +133,17 @@ class MusicGenServer:
             self.llm_model.device
         )
 
-        generated_ids = self.llm_model.generate(**model_inputs, max_new_tokens=512)
+        generated_ids = self.llm_model.generate(
+            **model_inputs, max_new_tokens=512)
 
         generated_ids = [
-            output_ids[len(input_ids) :]
+            output_ids[len(input_ids):]
             for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
         ]
 
-        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        
+        response = self.tokenizer.batch_decode(
+            generated_ids, skip_special_tokens=True)[0]
+
         return response
 
     # Genrate Tags
@@ -155,7 +153,7 @@ class MusicGenServer:
 
         # Run LLM and Return the response
         return self.qwen_prompt(full_prompt)
-    
+
     def generate_title(self, desc: str):
         # insert description
         full_prompt = TITLE_GENERATOR_PROMPT.format(user_prompt=desc)
@@ -176,7 +174,8 @@ class MusicGenServer:
         prompt = f"Based on the following music description, list 3-5 relevant genres or categories as a comma-separated list. For example: Pop, Electronic, Sad, 80s. Description: '{description}'"
 
         response_text = self.qwen_prompt(prompt)
-        categories = [cat.strip() for cat in response_text.split(",") if cat.strip()]
+        categories = [cat.strip()
+                      for cat in response_text.split(",") if cat.strip()]
         return categories
 
     def genrate_And_upload_s3(
@@ -227,47 +226,11 @@ class MusicGenServer:
 
         os.remove(output_path)
 
-        # Category Genration
-        categories = self.generate_categories(description_for_categorization)
-        
-        title = self.generate_title(final_lyrics)
-        
         # Thumbnail Genration
-        
-        thumbnail_prompt = f"""
-            Album cover art, high quality, professional music artwork,
-            cinematic lighting, detailed illustration, modern design,
-            no text, no logo, no watermark,
-            inspired by the mood and genre of the song,
-            {prompt}
-            """
-
-        # image = self.image_pipe(
-        #     prompt=thumbnail_prompt, num_inference_steps=1, guidance_scale=0.0
-        # ).images[0]
-        del self.music_model
-        del self.llm_model
-        del self.tokenizer
-        gc.collect()
-        torch.cuda.empty_cache()
-
-        # ---------- IMAGE (FLUX – SAFE) ----------
-        from diffusers import FluxPipeline
-
-        pipe = FluxPipeline.from_pretrained(
-            "black-forest-labs/FLUX.1-schnell",
-            torch_dtype=torch.float16,
-            cache_dir="/.cache/huggingface",
-        ).to("cuda")
-
-        image = pipe(
-            prompt=thumbnail_prompt,
-            num_inference_steps=2,
+        thumbnail_prompt = f"{prompt} , Create Music Album cover art"
+        image = self.image_pipe(
+            prompt=thumbnail_prompt, num_inference_steps=1, guidance_scale=0.0
         ).images[0]
-
-        del pipe
-        torch.cuda.empty_cache()
-
         image_output_path = os.path.join(output_dir, f"{uuid.uuid4()}.png")
         image.save(image_output_path)
 
@@ -278,6 +241,10 @@ class MusicGenServer:
 
         os.remove(image_output_path)
 
+        # Category Genration
+        categories = self.generate_categories(description_for_categorization)
+
+        title = self.generate_title(final_lyrics)
 
         return GenrateMusicResponseS3(
             s3_key=audio_s3_key_name,
@@ -344,16 +311,18 @@ def main():
     request_data = GenrateFromDescriptionRequest(
         full_described_song="love song about guys first girlfriend who he founds really adorable",
         guidance_scale=15,
-        
+
     )
 
     payload = request_data.model_dump()
 
     headers = {
-        "Modal-Secret": "",
-        "Modal-Key": "",
+        "Modal-Secret": "ws-PZeAmpwfCL0bIU25hNcwLA",
+        "Modal-Key": "wk-7yMrBmHcnaJeSqQTylgQBB",
     }
-    
+
+    # Modal-Secret: ws-PZeAmpwfCL0bIU25hNcwLA
+    # Modal-Key: wk-7yMrBmHcnaJeSqQTylgQBB
 
     response = requests.post(endpoint_url, json=payload, headers=headers)
     response.raise_for_status()
