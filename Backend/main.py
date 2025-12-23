@@ -81,6 +81,14 @@ class GenrateMusicResponse(BaseModel):
 class MusicGenServer:
     @modal.enter()
     def load_model(self):
+        import torchaudio
+        import soundfile as sf
+
+        def safe_save(path, waveform, sample_rate, **kwargs):
+            sf.write(path, waveform.cpu().numpy().T, sample_rate)
+
+        torchaudio.save = safe_save
+    
         from acestep.pipeline_ace_step import ACEStepPipeline
         from transformers import AutoTokenizer, AutoModelForCausalLM
         from diffusers import AutoPipelineForText2Image
@@ -96,7 +104,7 @@ class MusicGenServer:
         )
 
         # llm model
-        model_id = "Qwen/Qwen2-7B-Instruct"
+        model_id = "Qwen/Qwen2.5-14B-Instruct"
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
 
         self.llm_model = AutoModelForCausalLM.from_pretrained(
@@ -131,9 +139,7 @@ class MusicGenServer:
             for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
         ]
 
-        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[
-            0
-        ]
+        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
         
         return response
 
@@ -253,6 +259,7 @@ class MusicGenServer:
         lyrics = ""
         if not request.instrumental:
             lyrics = self.generate_lyrics(request.full_described_song)
+            print(lyrics)
         return self.genrate_And_upload_s3(
             prompt=prompt,
             lyrics=lyrics,
@@ -281,6 +288,7 @@ class MusicGenServer:
         lyrics = ""
         if not request.instrumental:
             lyrics = self.generate_lyrics(request.described_lyrics)
+            print(lyrics)
 
         return self.genrate_And_upload_s3(
             prompt=request.prompt,
@@ -296,16 +304,20 @@ def main():
     endpoint_url = server.genrate_from_description.get_web_url()
 
     request_data = GenrateFromDescriptionRequest(
-        full_described_song="An energetic, fast-paced hip-hop track in a minor key. The lyrics should be from the perspective of an old-school rapper who feels like a ghost in the new era of viral social media trends. He's reflecting on his legacy with a mix of pride and defiance",
-        guidance_scale=20,
+        full_described_song="love song about guys first girlfriend who he founds really adorable",
+        guidance_scale=15,
+        
     )
 
     payload = request_data.model_dump()
 
     headers = {
-        "Modal-Secret": "ws-kBEH8zM9LpZ8kvGlaMRNsM",
-        "Modal-Key": "wk-T9cNEJygGkALWGUKG2Rmgi",
+        "Modal-Secret": "ws-PZeAmpwfCL0bIU25hNcwLA",
+        "Modal-Key": "wk-7yMrBmHcnaJeSqQTylgQBB",
     }
+    
+    # Modal-Secret: ws-PZeAmpwfCL0bIU25hNcwLA
+    # Modal-Key: wk-7yMrBmHcnaJeSqQTylgQBB
 
     response = requests.post(endpoint_url, json=payload, headers=headers)
     response.raise_for_status()

@@ -1,5 +1,11 @@
-transformers
-diffusers
-torch
-pydantic
-boto3
+transformers==4.49.0
+diffusers==0.36.0
+peft==0.17.1
+accelerate==1.6.0
+soundfile
+torchaudio>=2.1
+torchcodec
+torch>=2.1
+pydantic>=2.0
+boto3>=1.28
+
