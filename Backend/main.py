@@ -1,3 +1,5 @@
+import gc
+import torch
 import base64
 from typing import List
 import uuid
@@ -6,6 +8,7 @@ import os
 import requests
 import boto3
 from botocore.client import Config
+
 
 from pydantic import BaseModel
 
@@ -29,7 +32,9 @@ image = (
             "cd /temp/ACE-step && pip install .",
         ]
     )
-    .env({"HF_HOME": "/.cache/huggingface"})
+    .env({
+        "HF_HOME": "/.cache/huggingface",
+        })
     .add_local_python_source("prompts")
 )
 
@@ -91,8 +96,8 @@ class MusicGenServer:
     
         from acestep.pipeline_ace_step import ACEStepPipeline
         from transformers import AutoTokenizer, AutoModelForCausalLM
-        from diffusers import AutoPipelineForText2Image
-        import torch
+        # from diffusers import AutoPipelineForText2Image
+        # import torch
 
         # Music Genration model
         self.music_model = ACEStepPipeline(
@@ -115,11 +120,11 @@ class MusicGenServer:
         )
 
         # Stable defusion model
-        self.image_pipe = AutoPipelineForText2Image.from_pretrained(
-            "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
-        )
+        # self.image_pipe = AutoPipelineForText2Image.from_pretrained(
+        #     "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
+        # )
 
-        self.image_pipe.to("cuda")
+        # self.image_pipe.to("cuda")
 
     def qwen_prompt(self, question: str):
         messages = [{"role": "user", "content": question}]
@@ -222,24 +227,57 @@ class MusicGenServer:
 
         os.remove(output_path)
 
+        # Category Genration
+        categories = self.generate_categories(description_for_categorization)
+        
+        title = self.generate_title(final_lyrics)
+        
         # Thumbnail Genration
-        thumbnail_prompt = f"{prompt} , Create Music Album cover art"
-        image = self.image_pipe(
-            prompt=thumbnail_prompt, num_inference_steps=1, guidance_scale=0.0
+        
+        thumbnail_prompt = f"""
+            Album cover art, high quality, professional music artwork,
+            cinematic lighting, detailed illustration, modern design,
+            no text, no logo, no watermark,
+            inspired by the mood and genre of the song,
+            {prompt}
+            """
+
+        # image = self.image_pipe(
+        #     prompt=thumbnail_prompt, num_inference_steps=1, guidance_scale=0.0
+        # ).images[0]
+        del self.music_model
+        del self.llm_model
+        del self.tokenizer
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        # ---------- IMAGE (FLUX – SAFE) ----------
+        from diffusers import FluxPipeline
+
+        pipe = FluxPipeline.from_pretrained(
+            "black-forest-labs/FLUX.1-schnell",
+            torch_dtype=torch.float16,
+            cache_dir="/.cache/huggingface",
+        ).to("cuda")
+
+        image = pipe(
+            prompt=thumbnail_prompt,
+            num_inference_steps=2,
         ).images[0]
+
+        del pipe
+        torch.cuda.empty_cache()
+
         image_output_path = os.path.join(output_dir, f"{uuid.uuid4()}.png")
         image.save(image_output_path)
 
         image_s3_key_name = f"{uuid.uuid4()}.png"
 
-        s3_client.upload_file(image_output_path, R2_BUCKET_NAME, image_s3_key_name)
+        s3_client.upload_file(
+            image_output_path, R2_BUCKET_NAME, image_s3_key_name)
 
         os.remove(image_output_path)
 
-        # Category Genration
-        categories = self.generate_categories(description_for_categorization)
-        
-        title = self.generate_title(final_lyrics)
 
         return GenrateMusicResponseS3(
             s3_key=audio_s3_key_name,
