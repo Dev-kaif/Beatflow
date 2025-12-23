@@ -350,12 +350,10 @@ def main():
     payload = request_data.model_dump()
 
     headers = {
-        "Modal-Secret": "ws-PZeAmpwfCL0bIU25hNcwLA",
-        "Modal-Key": "wk-7yMrBmHcnaJeSqQTylgQBB",
+        "Modal-Secret": "",
+        "Modal-Key": "",
     }
     
-    # Modal-Secret: ws-PZeAmpwfCL0bIU25hNcwLA
-    # Modal-Key: wk-7yMrBmHcnaJeSqQTylgQBB
 
     response = requests.post(endpoint_url, json=payload, headers=headers)
     response.raise_for_status()
