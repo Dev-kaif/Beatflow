@@ -102,14 +102,14 @@ export function AppSidebar({
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between rounded-md bg-white px-3 py-2">
                 <span className="text-neutral-700">
-                  Starter · 10 credits
+                  Starter · 5 credits
                 </span>
                 <span className="font-semibold text-neutral-900">$2</span>
               </div>
 
               <div className="flex items-center justify-between rounded-md bg-white px-3 py-2">
                 <span className="text-neutral-700">
-                  Creator · 30 credits
+                  Creator · 15 credits
                 </span>
                 <span className="font-semibold text-neutral-900">$5</span>
               </div>

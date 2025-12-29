@@ -128,10 +128,6 @@ export const auth = betterAuth({
   `,
             });
         },
-        afterEmailVerification: async (user) => {
-            console.log(`${user.email} verified successfully.`);
-            // more logic here if needed
-        },
     },
     socialProviders: {
         google: {
@@ -181,11 +177,11 @@ export const auth = betterAuth({
 
                         switch (productId) {
                             case productMid: // Medium
-                                CreditsToAdd = 10;
+                                CreditsToAdd = 5;
                                 package_tier = "starter";
                                 break;
                             case productMax: // High
-                                CreditsToAdd = 30;
+                                CreditsToAdd = 15;
                                 package_tier = "creator";
                                 break;
                         }

@@ -1022,7 +1022,7 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      30 Music Generation Credits
+                      15 Music Generation Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
@@ -1043,7 +1043,7 @@ export default function LandingPage({
                       onClick={handleUpgradeToMax}
                       className="animated-gradient w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white"
                     >
-                      Unlock 30 Credits for $5
+                      Unlock 15 Credits for $5
                     </Button>
                     <p className="mt-3 text-center text-xs text-muted-foreground">
                       ⏳ Limited-time launch pricing
@@ -1072,7 +1072,7 @@ export default function LandingPage({
                   <ul className="mb-8 space-y-4">
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
-                      10 Music Generation Credits
+                      5 Music Generation Credits
                     </li>
                     <li className="flex items-center">
                       <Check className="mr-2 text-green-500" />
