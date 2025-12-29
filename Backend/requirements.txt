@@ -8,5 +8,3 @@ torchcodec
 torch>=2.1
 pydantic>=2.0
 boto3>=1.28
-sentencepiece
-

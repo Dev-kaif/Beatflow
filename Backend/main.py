@@ -105,7 +105,7 @@ class MusicGenServer:
         )
 
         # llm model
-        model_id = "Qwen/Qwen2.5-14B-Instruct"
+        model_id = "Qwen/Qwen2.5-7B-Instruct"
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
 
         self.llm_model = AutoModelForCausalLM.from_pretrained(
@@ -317,9 +317,13 @@ def main():
     payload = request_data.model_dump()
 
     headers = {
-        "Modal-Secret": "ws-PZeAmpwfCL0bIU25hNcwLA",
-        "Modal-Key": "wk-7yMrBmHcnaJeSqQTylgQBB",
+        "Modal-Secret": "ws-7xuubmQoqeOSORFTBKS21z",
+        "Modal-Key": "wk-zmj4w3JjJggClN6dp7451m",
     }
+    # headers = {
+    #     "Modal-Secret": "ws-PZeAmpwfCL0bIU25hNcwLA",
+    #     "Modal-Key": "wk-7yMrBmHcnaJeSqQTylgQBB",
+    # }
 
     # Modal-Secret: ws-PZeAmpwfCL0bIU25hNcwLA
     # Modal-Key: wk-7yMrBmHcnaJeSqQTylgQBB
