@@ -5,6 +5,7 @@ import { SongPanel } from "../../../components/create/SongPanel";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import TrackListFetcher from "@/components/create/trackListFetch";
+import { db } from "@/server/db";
 
 export default async function Page() {
   const session = await auth.api.getSession({
@@ -15,10 +16,22 @@ export default async function Page() {
     redirect("/auth/sign-in");
   }
 
+  const noOfCredits = await db.user.findFirst({
+    where: {
+      id: session.user.id
+    },
+    select: {
+      credits: true
+    }
+  });
+
+  const noCreditStatus = (noOfCredits?.credits ?? 0) <= 0;
+
+
   return (
     <div className="flex flex-col lg:flex-row">
       <div className="bg-background z-10 w-full flex-none lg:sticky lg:top-0 lg:w-1/4">
-        <SongPanel />
+        <SongPanel noCreditStatus={noCreditStatus} />
       </div>
 
       <div className="h-[calc(97vh-100px)] flex-1 overflow-y-auto [mask-image:linear-gradient(to_bottom,white,white_90%,transparent)] [mask-size:100%_100%] [mask-position:0_20px] [mask-repeat:no-repeat]">
