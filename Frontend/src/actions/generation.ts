@@ -31,7 +31,7 @@ const s3 = new S3Client({
   },
 });
 
-/* ------------------ Song Generation ------------------ */
+/* Song Generation */
 export async function generateSong(generateRequest: GenerateRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -67,7 +67,7 @@ export async function queueSong(
   });
 }
 
-/* ------------------ S3 Helpers ------------------ */
+/* S3 Helpers */
 export async function getPresignedUrl(key: string): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: env.S3_BUCKET_NAME,
@@ -76,68 +76,67 @@ export async function getPresignedUrl(key: string): Promise<string> {
   return getSignedUrl(s3, command, { expiresIn: 3600 });
 }
 
-async function objectExists(key: string): Promise<boolean> {
-  try {
-    await s3.send(
-      new HeadObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: key }),
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
 
-// ------------------ NEW: Audio Worker Communication ------------------
-// This new helper function replaces all the local FFmpeg logic.
-// Define the shape of the error response from your worker
-interface WorkerErrorResponse {
-  details?: string;
-}
+// async function objectExists(key: string): Promise<boolean> {
+//   try {
+//     await s3.send(
+//       new HeadObjectCommand({ Bucket: env.S3_BUCKET_NAME, Key: key }),
+//     );
+//     return true;
+//   } catch {
+//     return false;
+//   }
+// }
 
-async function processAudioOnWorker({
-  task,
-  songKey,
-  outputKey,
-  params,
-}: {
-  task: "CONVERT_TO_MP3" | "CREATE_PREVIEW";
-  songKey: string;
-  outputKey: string;
-  params?: Record<string, unknown>;
-}) {
-  if (await objectExists(outputKey)) {
-    return getPresignedUrl(outputKey);
-  }
 
-  const workerUrl = `${env.NODE_BACKEND_URL}/process-audio`;
-  console.log(`Sending task "${task}" to audio worker for ${songKey}`);
+// interface WorkerErrorResponse {
+//   details?: string;
+// }
 
-  const response = await fetch(workerUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": env.AUDIO_WORKER_API_KEY,
-    },
-    body: JSON.stringify({
-      task,
-      songKey,
-      outputKey,
-      params,
-    }),
-  });
+// async function processAudioOnWorker({
+//   task,
+//   songKey,
+//   outputKey,
+//   params,
+// }: {
+//   task: "CONVERT_TO_MP3" | "CREATE_PREVIEW";
+//   songKey: string;
+//   outputKey: string;
+//   params?: Record<string, unknown>;
+// }) {
+//   if (await objectExists(outputKey)) {
+//     return getPresignedUrl(outputKey);
+//   }
 
-  if (!response.ok) {
-    // Assert the type of the JSON body
-    const errorBody = (await response.json()) as WorkerErrorResponse;
-    throw new Error(
-      `Audio worker failed: ${errorBody.details ?? response.statusText}`,
-    );
-  }
+//   const workerUrl = `${env.NODE_BACKEND_URL}/process-audio`;
+//   console.log(`Sending task "${task}" to audio worker for ${songKey}`);
 
-  return getPresignedUrl(outputKey);
-}
+//   const response = await fetch(workerUrl, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "x-api-key": env.AUDIO_WORKER_API_KEY,
+//     },
+//     body: JSON.stringify({
+//       task,
+//       songKey,
+//       outputKey,
+//       params,
+//     }),
+//   });
 
-/* ------------------ Playback + Preview ------------------ */
+//   if (!response.ok) {
+//     // Assert the type of the JSON body
+//     const errorBody = (await response.json()) as WorkerErrorResponse;
+//     throw new Error(
+//       `Audio worker failed: ${errorBody.details ?? response.statusText}`,
+//     );
+//   }
+
+//   return getPresignedUrl(outputKey);
+// }
+
+/* Playback + Preview */
 export async function getPlayUrl(songId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/auth/sign-in");
@@ -151,10 +150,10 @@ export async function getPlayUrl(songId: string) {
     select: { id: true, s3Key: true, userId: true },
   });
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { package: true },
-  });
+  // const user = await db.user.findUnique({
+  //   where: { id: session.user.id },
+  //   select: { package: true },
+  // });
 
   if (!song?.s3Key) throw new Error("Song not found or not accessible");
 
@@ -210,61 +209,68 @@ export async function getDownloadUrl(songId: string) {
       OR: [{ userId: session.user.id }, { published: true }],
       s3Key: { not: null },
     },
-    select: { id: true, s3Key: true, userId: true, published: true },
+    select: {
+      id: true,
+      s3Key: true,
+      userId: true,
+      published: true
+    },
   });
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { package: true },
-  });
+  // const user = await db.user.findUnique({
+  //   where: { id: session.user.id },
+  //   select: { package: true },
+  // });
 
   if (!song?.s3Key) throw new Error("Song not found or not accessible");
 
-  const isOwner = song.userId === session.user.id;
-  const userPackage = user?.package ?? "free";
+  return getPresignedUrlForDownload(song.s3Key);
 
-  // Creator users always get the original WAV
-  if (userPackage === "creator") {
-    return getPresignedUrlForDownload(song.s3Key);
-  }
+  // const isOwner = song.userId === session.user.id;
+  // const userPackage = user?.package ?? "free";
 
-  // Starter users get WAV for their own songs, MP3 for others
-  if (userPackage === "starter") {
-    if (isOwner) {
-      return getPresignedUrlForDownload(song.s3Key);
-    } else {
-      const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
-      return processAudioOnWorker({
-        task: "CONVERT_TO_MP3",
-        songKey: song.s3Key,
-        outputKey: mp3Key,
-        params: { bitrate: "192k" },
-      });
-    }
-  }
+  // // Creator users always get the original WAV
+  // if (userPackage === "creator") {
+  //   return getPresignedUrlForDownload(song.s3Key);
+  // }
 
-  // Free users get MP3 for their own, or a watermarked preview for others
-  if (userPackage === "free") {
-    if (isOwner) {
-      const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
-      return processAudioOnWorker({
-        task: "CONVERT_TO_MP3",
-        songKey: song.s3Key,
-        outputKey: mp3Key,
-        params: { bitrate: "192k" },
-      });
-    } else {
-      const previewKey = song.s3Key.replace(/\.wav$/, "-preview.mp3");
-      return processAudioOnWorker({
-        task: "CREATE_PREVIEW",
-        songKey: song.s3Key,
-        outputKey: previewKey,
-        params: { duration: 30, bitrate: "128k" },
-      });
-    }
-  }
+  // // Starter users get WAV for their own songs, MP3 for others
+  // if (userPackage === "starter") {
+  //   if (isOwner) {
+  //     return getPresignedUrlForDownload(song.s3Key);
+  //   } else {
+  //     const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
+  //     return processAudioOnWorker({
+  //       task: "CONVERT_TO_MP3",
+  //       songKey: song.s3Key,
+  //       outputKey: mp3Key,
+  //       params: { bitrate: "192k" },
+  //     });
+  //   }
+  // }
 
-  throw new Error("Unsupported package type");
+  // // Free users get MP3 for their own, or a watermarked preview for others
+  // if (userPackage === "free") {
+  //   if (isOwner) {
+  //     const mp3Key = song.s3Key.replace(/\.wav$/, ".mp3");
+  //     return processAudioOnWorker({
+  //       task: "CONVERT_TO_MP3",
+  //       songKey: song.s3Key,
+  //       outputKey: mp3Key,
+  //       params: { bitrate: "192k" },
+  //     });
+  //   } else {
+  //     const previewKey = song.s3Key.replace(/\.wav$/, "-preview.mp3");
+  //     return processAudioOnWorker({
+  //       task: "CREATE_PREVIEW",
+  //       songKey: song.s3Key,
+  //       outputKey: previewKey,
+  //       params: { duration: 30, bitrate: "128k" },
+  //     });
+  //   }
+  // }
+
+  // throw new Error("Unsupported package type");
 }
 
 export async function getPresignedUrlForDownload(key: string): Promise<string> {
