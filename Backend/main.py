@@ -6,22 +6,21 @@ import os
 import requests
 import boto3
 from botocore.client import Config
-
+import subprocess
 from pydantic import BaseModel
 
 from prompts import (
     LYRICS_GENERATOR_PROMPT,
     PROMPT_GENERATOR_PROMPT,
-    TITLE_GENERATOR_PROMPT
+    TITLE_GENERATOR_PROMPT,
 )
 
 app = modal.App("music-genrator")
 
-# uv run python -m modal setup
 
 image = (
     modal.Image.debian_slim()
-    .apt_install("git")
+    .apt_install(["git", "ffmpeg"])
     .pip_install_from_requirements("requirements.txt")
     .run_commands(
         [
@@ -33,8 +32,7 @@ image = (
     .add_local_python_source("prompts")
 )
 
-model_volume = modal.Volume.from_name(
-    "ace-step-models", create_if_missing=True)
+model_volume = modal.Volume.from_name("ace-step-models", create_if_missing=True)
 hf_volume = modal.Volume.from_name("qwen-hf-cache", create_if_missing=True)
 music_gen_secrets = modal.Secret.from_name("music-genrator")
 
@@ -133,16 +131,16 @@ class MusicGenServer:
             self.llm_model.device
         )
 
-        generated_ids = self.llm_model.generate(
-            **model_inputs, max_new_tokens=512)
+        generated_ids = self.llm_model.generate(**model_inputs, max_new_tokens=512)
 
         generated_ids = [
-            output_ids[len(input_ids):]
+            output_ids[len(input_ids) :]
             for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
         ]
 
-        response = self.tokenizer.batch_decode(
-            generated_ids, skip_special_tokens=True)[0]
+        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[
+            0
+        ]
 
         return response
 
@@ -174,8 +172,7 @@ class MusicGenServer:
         prompt = f"Based on the following music description, list 3-5 relevant genres or categories as a comma-separated list. For example: Pop, Electronic, Sad, 80s. Description: '{description}'"
 
         response_text = self.qwen_prompt(prompt)
-        categories = [cat.strip()
-                      for cat in response_text.split(",") if cat.strip()]
+        categories = [cat.strip() for cat in response_text.split(",") if cat.strip()]
         return categories
 
     def genrate_And_upload_s3(
@@ -220,11 +217,33 @@ class MusicGenServer:
             manual_seeds=str(seed),
         )
 
-        audio_s3_key_name = f"{uuid.uuid4()}.wav"
+        mp3_output_path = output_path.replace(".wav", ".mp3")
 
-        s3_client.upload_file(output_path, R2_BUCKET_NAME, audio_s3_key_name)
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                output_path,  # input wav
+                "-vn",  # no video
+                "-ar",
+                "44100",  # sample rate
+                "-ac",
+                "2",  # stereo
+                "-b:a",
+                "192k",  # audio bitrate
+                mp3_output_path,  # output mp3
+            ],
+            check=True,
+        )
 
         os.remove(output_path)
+
+        audio_s3_key_name = f"{uuid.uuid4()}.mp3"
+
+        s3_client.upload_file(mp3_output_path, R2_BUCKET_NAME, audio_s3_key_name)
+
+        os.remove(mp3_output_path)
 
         # Thumbnail Genration
         thumbnail_prompt = f"{prompt} , Create Music Album cover art"
@@ -236,8 +255,7 @@ class MusicGenServer:
 
         image_s3_key_name = f"{uuid.uuid4()}.png"
 
-        s3_client.upload_file(
-            image_output_path, R2_BUCKET_NAME, image_s3_key_name)
+        s3_client.upload_file(image_output_path, R2_BUCKET_NAME, image_s3_key_name)
 
         os.remove(image_output_path)
 
@@ -250,7 +268,7 @@ class MusicGenServer:
             s3_key=audio_s3_key_name,
             cover_image_s3_key=image_s3_key_name,
             categories=categories,
-            title=title
+            title=title,
         )
 
     # Generate Song from Song Description
@@ -311,7 +329,6 @@ def main():
     request_data = GenrateFromDescriptionRequest(
         full_described_song="love song about guys first girlfriend who he founds really adorable",
         guidance_scale=15,
-
     )
 
     payload = request_data.model_dump()
