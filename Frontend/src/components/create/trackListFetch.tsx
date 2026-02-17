@@ -19,6 +19,7 @@ export default async function TrackListFetcher() {
   const songs = await db.song.findMany({
     where: {
       userId: session.user.id,
+      storageStatus: "ACTIVE",
     },
     include: {
       user: {

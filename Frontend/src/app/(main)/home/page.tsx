@@ -21,6 +21,7 @@ export default async function Page() {
   const songs = await db.song.findMany({
     where: {
       published: true,
+      storageStatus: "ACTIVE",
     },
     orderBy: {
       createdAt: "desc",
